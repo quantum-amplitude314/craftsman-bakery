@@ -5,8 +5,10 @@ import {
   NAME_MAX_LENGTH,
   type ReservationReceipt,
 } from "@acme-bakery/contracts";
+import Link from "next/link";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { reserve } from "@/app/reserve-action";
+import { FormMessage } from "@/components/form-message";
 import { QuantityStepper } from "@/components/quantity-stepper";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
@@ -25,43 +27,38 @@ const FIELD_HINTS: Record<FormField, string> = {
   turnstile: "Complete the check above the button.",
 };
 
-const MESSAGE_CLASS_NAME =
-  "rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-destructive";
-
 function StatusMessage({ state, closesAt }: { state: ReserveState; closesAt: string }) {
   switch (state.status) {
     case "invalid":
       return (
-        <ul className={`${MESSAGE_CLASS_NAME} list-disc space-y-1 pl-9`}>
-          {state.invalidFields.map((field) => (
-            <li key={field}>{FIELD_HINTS[field]}</li>
-          ))}
-        </ul>
+        <FormMessage>
+          <ul className="list-disc space-y-1 pl-5">
+            {state.invalidFields.map((field) => (
+              <li key={field}>{FIELD_HINTS[field]}</li>
+            ))}
+          </ul>
+        </FormMessage>
       );
     case "no-longer-fits":
       return (
-        <p className={MESSAGE_CLASS_NAME}>
+        <FormMessage>
           Not enough left of {state.productNames.join(", ")}; nothing was reserved. The numbers
           below are current: lower the quantity and reserve again.
-        </p>
+        </FormMessage>
       );
     case "closed":
       return (
-        <p className={MESSAGE_CLASS_NAME}>
-          Reservations for this day closed {formatWallClock(closesAt)}.
-        </p>
+        <FormMessage>Reservations for this day closed {formatWallClock(closesAt)}.</FormMessage>
       );
     case "turnstile-failed":
       return (
-        <p className={MESSAGE_CLASS_NAME}>
+        <FormMessage>
           The check did not pass; nothing was reserved. Complete it again and resubmit.
-        </p>
+        </FormMessage>
       );
     case "failed":
       return (
-        <p className={MESSAGE_CLASS_NAME}>
-          Something went wrong; nothing was reserved. Please try again.
-        </p>
+        <FormMessage>Something went wrong; nothing was reserved. Please try again.</FormMessage>
       );
     default:
       return null;
@@ -87,7 +84,11 @@ function Receipt({
           <p className="font-mono text-5xl text-primary tracking-[0.2em]">{code}</p>
         </div>
         <p className="text-muted-foreground">
-          Plans changed? Cancel with the code until {formatWallClock(closesAt)}.
+          Plans changed?{" "}
+          <Link href={`/cancel?code=${code}`} className="text-primary underline underline-offset-4">
+            Cancel with the code
+          </Link>{" "}
+          until {formatWallClock(closesAt)}.
         </p>
         <Button variant="outline" size="lg" nativeButton={false} render={<a href="/" />}>
           Make another reservation

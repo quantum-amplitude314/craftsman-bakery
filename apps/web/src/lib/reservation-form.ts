@@ -7,10 +7,9 @@ import {
 } from "@acme-bakery/contracts";
 import { ORPCError } from "@orpc/client";
 import { z } from "zod";
+import { TURNSTILE_FIELD } from "./turnstile.ts";
 
 const QUANTITY_FIELD_PREFIX = "quantity:";
-/** The hidden input Turnstile adds to the form it renders in. */
-const TURNSTILE_FIELD = "cf-turnstile-response";
 const FORM_FIELDS = ["name", "phone", "items", "turnstile"] as const;
 
 export type FormField = (typeof FORM_FIELDS)[number];

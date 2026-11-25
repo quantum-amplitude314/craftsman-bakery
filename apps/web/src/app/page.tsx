@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { connection } from "next/server";
 import { ReservationForm } from "@/components/reservation-form";
 import { apiClient } from "@/lib/api";
@@ -43,6 +44,12 @@ export default async function HomePage() {
           </p>
         </div>
         <ReservationForm availability={availability} />
+        <p className="text-center text-muted-foreground text-sm">
+          Have a code?{" "}
+          <Link href="/cancel" className="text-primary underline underline-offset-4">
+            Cancel a reservation
+          </Link>
+        </p>
       </section>
     </>
   );
