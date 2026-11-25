@@ -1,14 +1,14 @@
-name: acme-bakery
+name: craftsman-bakery
 services:
   postgres-dev:
     image: docker.io/library/postgres:19-alpine
-    container_name: acme-bakery-pg-dev
+    container_name: craftsman-bakery-pg-dev
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: acme_bakery
+      POSTGRES_DB: craftsman_bakery
     healthcheck:
-      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "acme_bakery"]
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "craftsman_bakery"]
       interval: 2s
       timeout: 5s
       retries: 30
@@ -18,13 +18,14 @@ services:
       - pgdata-dev:/var/lib/postgresql
   postgres-test:
     image: docker.io/library/postgres:19-alpine
-    container_name: acme-bakery-pg-test
+    container_name: craftsman-bakery-pg-test
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: acme_bakery_test
+      POSTGRES_DB: craftsman_bakery_test
     healthcheck:
-      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "acme_bakery_test"]
+      test:
+        ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "craftsman_bakery_test"]
       interval: 2s
       timeout: 5s
       retries: 30

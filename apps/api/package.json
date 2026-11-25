@@ -1,5 +1,5 @@
 {
-  "name": "@acme-bakery/api",
+  "name": "@craftsman-bakery/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "deploy": "wrangler deploy --env=\"\""
   },
   "dependencies": {
-    "@acme-bakery/contracts": "workspace:*",
+    "@craftsman-bakery/contracts": "workspace:*",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.13.22",
     "pg": "^8.23.1",

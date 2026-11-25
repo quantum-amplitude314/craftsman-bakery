@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type Contract, contract } from "@acme-bakery/contracts";
+import { type Contract, contract } from "@craftsman-bakery/contracts";
 import { createORPCClient } from "@orpc/client";
 import type { ContractRouterClient } from "@orpc/contract";
 import type { JsonifiedClient } from "@orpc/openapi-client";

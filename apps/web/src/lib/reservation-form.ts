@@ -4,7 +4,7 @@ import {
   type ReservationInput,
   type ReservationReceipt,
   reservationInputSchema,
-} from "@acme-bakery/contracts";
+} from "@craftsman-bakery/contracts";
 import { ORPCError } from "@orpc/client";
 import { z } from "zod";
 import { TURNSTILE_FIELD } from "./turnstile.ts";

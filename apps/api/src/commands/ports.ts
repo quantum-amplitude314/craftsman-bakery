@@ -1,4 +1,4 @@
-import type { CapacityInput, ReservationInput } from "@acme-bakery/contracts";
+import type { CapacityInput, ReservationInput } from "@craftsman-bakery/contracts";
 
 export type ReserveResult = "RESERVED" | "CAPACITY_EXCEEDED" | "CODE_TAKEN";
 export type SetCapacityResult = "SET" | "BELOW_RESERVED" | "UNKNOWN_PRODUCT";

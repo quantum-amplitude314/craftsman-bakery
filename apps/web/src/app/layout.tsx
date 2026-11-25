@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-const TITLE = "ACME Bakery";
+const TITLE = "Craftsman Bakery";
 const DESCRIPTION = "Reserve bread and pastry for pickup.";
 /** Written by packages/maintain/brand/build.sh; X falls back to it. */
-const SHARE_IMAGE = { url: "/og-image-v1.jpg", type: "image/jpeg", width: 1200, height: 630 };
+const SHARE_IMAGE = { url: "/og-image-v2.jpg", type: "image/jpeg", width: 1200, height: 630 };
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const { WEB_ORIGIN: webOrigin } = await getEnv();

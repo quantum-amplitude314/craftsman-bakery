@@ -1,4 +1,4 @@
-import type { ReservationInput } from "@acme-bakery/contracts";
+import type { ReservationInput } from "@craftsman-bakery/contracts";
 import { fail, succeed } from "../outcome.ts";
 import { type CutoffConfig, isReservationClosed } from "../rules/cutoff.ts";
 import type { ReservationWriteStore } from "./ports.ts";

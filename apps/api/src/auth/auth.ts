@@ -18,7 +18,7 @@ export const createAuth = ({
   trustedOrigins: string[];
 }) => {
   const auth = betterAuth({
-    appName: "ACME Bakery",
+    appName: "Craftsman Bakery",
     baseURL,
     basePath: "/api/auth",
     secret,

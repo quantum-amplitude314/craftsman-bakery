@@ -1,4 +1,4 @@
-import { codeSchema } from "@acme-bakery/contracts";
+import { codeSchema } from "@craftsman-bakery/contracts";
 import { ORPCError } from "@orpc/client";
 import { z } from "zod";
 import { TURNSTILE_FIELD } from "./turnstile.ts";

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "acme-bakery",
+      "name": "craftsman-bakery",
       "devDependencies": {
         "@socketsecurity/bun-security-scanner": "^1.1.3",
         "turbo": "^2.11.13",
@@ -11,10 +11,10 @@
       },
     },
     "apps/api": {
-      "name": "@acme-bakery/api",
+      "name": "@craftsman-bakery/api",
       "version": "0.1.0",
       "dependencies": {
-        "@acme-bakery/contracts": "workspace:*",
+        "@craftsman-bakery/contracts": "workspace:*",
         "@orpc/openapi": "catalog:",
         "@orpc/server": "catalog:",
         "better-auth": "catalog:",
@@ -32,11 +32,11 @@
       },
     },
     "apps/web": {
-      "name": "@acme-bakery/web",
+      "name": "@craftsman-bakery/web",
       "version": "0.1.0",
       "dependencies": {
-        "@acme-bakery/contracts": "workspace:*",
         "@base-ui/react": "^1.9.0",
+        "@craftsman-bakery/contracts": "workspace:*",
         "@orpc/client": "catalog:",
         "@orpc/contract": "catalog:",
         "@orpc/openapi-client": "catalog:",
@@ -65,7 +65,7 @@
       },
     },
     "packages/contracts": {
-      "name": "@acme-bakery/contracts",
+      "name": "@craftsman-bakery/contracts",
       "version": "0.1.0",
       "dependencies": {
         "@orpc/contract": "catalog:",
@@ -76,7 +76,7 @@
       },
     },
     "packages/maintain": {
-      "name": "@acme-bakery/maintain",
+      "name": "@craftsman-bakery/maintain",
       "version": "0.1.0",
       "dependencies": {
         "better-auth": "catalog:",
@@ -100,14 +100,6 @@
     "zod": "^4.6.7",
   },
   "packages": {
-    "@acme-bakery/api": ["@acme-bakery/api@workspace:apps/api"],
-
-    "@acme-bakery/contracts": ["@acme-bakery/contracts@workspace:packages/contracts"],
-
-    "@acme-bakery/maintain": ["@acme-bakery/maintain@workspace:packages/maintain"],
-
-    "@acme-bakery/web": ["@acme-bakery/web@workspace:apps/web"],
-
     "@alloc/quick-lru": ["@alloc/quick-lru@5.3.0", "", {}, "sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA=="],
 
     "@ast-grep/napi": ["@ast-grep/napi@0.45.3", "", { "optionalDependencies": { "@ast-grep/napi-darwin-arm64": "0.45.3", "@ast-grep/napi-darwin-x64": "0.45.3", "@ast-grep/napi-linux-arm64-gnu": "0.45.3", "@ast-grep/napi-linux-arm64-musl": "0.45.3", "@ast-grep/napi-linux-x64-gnu": "0.45.3", "@ast-grep/napi-linux-x64-musl": "0.45.3", "@ast-grep/napi-win32-arm64-msvc": "0.45.3", "@ast-grep/napi-win32-ia32-msvc": "0.45.3", "@ast-grep/napi-win32-x64-msvc": "0.45.3" } }, "sha512-bjJsUt0g3UCwbn9bjv7MnoR15rszSm79yPCXn4DWWK0NuYUUqBU/srtNMR4WnpfR7TnfBRdYFoqSNx0pGCNWJg=="],
@@ -315,6 +307,14 @@
     "@cloudflare/workerd-windows-64": ["@cloudflare/workerd-windows-64@1.20261123.1", "", { "os": "win32", "cpu": "x64" }, "sha512-/zl++/e/0JLMttdz4lUsCo58NaLKQZKancI2YPciaLH9iLHq6UOP2BQZt+dejGRrV9UxdpPYPHUYU9Km5PcALA=="],
 
     "@cloudflare/workers-utils": ["@cloudflare/workers-utils@0.57.0", "", { "dependencies": { "@cspotcode/source-map-support": "0.8.1", "chalk": "5.3.0", "dotenv": "16.3.1", "undici": "7.30.2" }, "peerDependencies": { "vitest": "^4.1.0 || ^5.0.0" }, "optionalPeers": ["vitest"] }, "sha512-6NulTDuddhxZUvCmDeyIVtn54Wo0rTV58YztF46V8NKBpH+PISm3aiudkCn0vLlRWeyYReNu5XmdE7hyvTwoLg=="],
+
+    "@craftsman-bakery/api": ["@craftsman-bakery/api@workspace:apps/api"],
+
+    "@craftsman-bakery/contracts": ["@craftsman-bakery/contracts@workspace:packages/contracts"],
+
+    "@craftsman-bakery/maintain": ["@craftsman-bakery/maintain@workspace:packages/maintain"],
+
+    "@craftsman-bakery/web": ["@craftsman-bakery/web@workspace:apps/web"],
 
     "@cspotcode/source-map-support": ["@cspotcode/source-map-support@0.8.1", "", { "dependencies": { "@jridgewell/trace-mapping": "0.3.9" } }, "sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw=="],
 

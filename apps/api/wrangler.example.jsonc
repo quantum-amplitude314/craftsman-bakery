@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "acme-bakery-api",
+  "name": "craftsman-bakery-api",
   "main": "src/worker.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -11,7 +11,7 @@
   "vars": {
     "BAKERY_TIME_ZONE": "Europe/Prague",
     "CUTOFF_TIME": "18:00",
-    "WEB_ORIGIN": "https://acme-bakery.example.com"
+    "WEB_ORIGIN": "https://craftsman-bakery.example.com"
   },
   "secrets": { "required": ["BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY"] },
   "hyperdrive": [
@@ -31,12 +31,12 @@
         {
           "binding": "HYPERDRIVE_COMMANDS",
           "id": "<hyperdrive id, caching off>",
-          "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/acme_bakery"
+          "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/craftsman_bakery"
         },
         {
           "binding": "HYPERDRIVE_QUERIES",
           "id": "<hyperdrive id, caching on>",
-          "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/acme_bakery"
+          "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/craftsman_bakery"
         }
       ]
     },

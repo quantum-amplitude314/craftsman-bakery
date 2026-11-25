@@ -1,4 +1,4 @@
-import { type Availability, contract, type ReservationInput } from "@acme-bakery/contracts";
+import { type Availability, contract, type ReservationInput } from "@craftsman-bakery/contracts";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { implement } from "@orpc/server";
 import { cancelReservation } from "../commands/cancel-reservation.ts";

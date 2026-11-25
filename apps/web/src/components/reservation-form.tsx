@@ -4,7 +4,7 @@ import {
   type Availability,
   NAME_MAX_LENGTH,
   type ReservationReceipt,
-} from "@acme-bakery/contracts";
+} from "@craftsman-bakery/contracts";
 import Link from "next/link";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { reserve } from "@/app/reserve-action";

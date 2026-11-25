@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CancelForm } from "@/components/cancel-form";
 
-export const metadata: Metadata = { title: "Cancel a reservation · ACME Bakery" };
+export const metadata: Metadata = { title: "Cancel a reservation · Craftsman Bakery" };
 
 export default async function CancelPage({ searchParams }: PageProps<"/cancel">) {
   const { code } = await searchParams;

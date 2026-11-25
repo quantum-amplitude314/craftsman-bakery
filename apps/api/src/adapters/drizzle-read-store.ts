@@ -1,4 +1,4 @@
-import type { PickupList } from "@acme-bakery/contracts";
+import type { PickupList } from "@craftsman-bakery/contracts";
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { Db } from "../db/client.ts";
 import { capacity, defaultCapacity, product, reservation, reservationItem } from "../db/schema.ts";

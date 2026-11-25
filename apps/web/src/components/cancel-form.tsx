@@ -1,6 +1,6 @@
 "use client";
 
-import { CODE_LENGTH } from "@acme-bakery/contracts";
+import { CODE_LENGTH } from "@craftsman-bakery/contracts";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { cancel } from "@/app/cancel-action";
 import { FormMessage } from "@/components/form-message";

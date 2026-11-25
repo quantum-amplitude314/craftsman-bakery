@@ -1,5 +1,5 @@
 {
-  "name": "@acme-bakery/web",
+  "name": "@craftsman-bakery/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "test": "bun test test"
   },
   "dependencies": {
-    "@acme-bakery/contracts": "workspace:*",
+    "@craftsman-bakery/contracts": "workspace:*",
     "@base-ui/react": "^1.9.0",
     "@orpc/client": "catalog:",
     "@orpc/contract": "catalog:",

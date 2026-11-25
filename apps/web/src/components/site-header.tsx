@@ -29,7 +29,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4 lg:max-w-5xl">
         {/* biome-ignore lint/performance/noImgElement: a tiny SVG needs no optimisation */}
         <img src="/icon.svg" alt="" width={32} height={32} />
-        <span className="font-heading font-semibold text-primary text-xl">ACME Bakery</span>
+        <span className="font-heading font-semibold text-primary text-xl">Craftsman Bakery</span>
       </div>
     </header>
   );

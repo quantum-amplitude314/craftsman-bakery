@@ -1,4 +1,4 @@
-import type { CapacityInput } from "@acme-bakery/contracts";
+import type { CapacityInput } from "@craftsman-bakery/contracts";
 import { fail, succeed } from "../outcome.ts";
 import type { ReservationWriteStore } from "./ports.ts";
 
