@@ -90,7 +90,7 @@ function Receipt({
           </Link>{" "}
           until {formatWallClock(closesAt)}.
         </p>
-        <Button variant="outline" size="lg" nativeButton={false} render={<a href="/" />}>
+        <Button variant="outline" size="lg" nativeButton={false} render={<Link href="/" />}>
           Make another reservation
         </Button>
       </CardContent>
@@ -98,7 +98,6 @@ function Receipt({
   );
 }
 
-/** What is left counts down as the customer adds, so it always reads against their order. */
 function ProductRow({ product }: { product: Availability["products"][number] }) {
   const { productId, name, description, available } = product;
   const [quantity, setQuantity] = useState(0);
@@ -110,7 +109,6 @@ function ProductRow({ product }: { product: Availability["products"][number] }) 
         <Label htmlFor={quantityFieldOf(productId)} className="text-base">
           {name}
         </Label>
-        {/* 90 % keeps 4.8:1 on the card, just above WCAG AA for small text. */}
         {description ? <p className="text-muted-foreground/90 text-sm">{description}</p> : null}
         <p className={available > 0 ? "text-muted-foreground text-sm" : "text-destructive text-sm"}>
           {available > 0 ? `${left} left` : "Sold out"}

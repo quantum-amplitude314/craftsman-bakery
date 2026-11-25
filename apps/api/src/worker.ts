@@ -43,7 +43,6 @@ app.on(["GET", "POST"], "/api/auth/*", async (context) => {
   } = context.env;
   const { db, close } = createDb({ connectionString: hyperdrive.connectionString });
   const { raw: request } = context.req;
-  // The web's server action forwards the visitor's IP as X-Forwarded-For, for the rate limit too.
   const remoteIp = request.headers.get("X-Forwarded-For");
   const auth = createAuth({
     db,

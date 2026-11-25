@@ -13,7 +13,6 @@ export type SignInOutcome =
   | { status: "turnstile-failed" }
   | { status: "failed" };
 
-/** `attempt` counts the submissions, so the Turnstile widget remounts for a fresh token. */
 export type SignInState = SignInOutcome & { attempt: number };
 
 const formSchema = z.object({
@@ -48,13 +47,11 @@ export const readSignInForm = (formData: FormData) => {
   return invalid;
 };
 
-/** Better Auth answers wrong credentials with 401 and its rate limit with 429. */
 const FAILURES_BY_STATUS: Record<number, SignInOutcome> = {
   401: { status: "wrong-credentials" },
   429: { status: "too-many-attempts" },
 };
 
-/** The API's sign-in hook refuses a missing or failing Turnstile token with this code. */
 const FAILURES_BY_CODE: Record<string, SignInOutcome> = {
   TURNSTILE_FAILED: { status: "turnstile-failed" },
 };

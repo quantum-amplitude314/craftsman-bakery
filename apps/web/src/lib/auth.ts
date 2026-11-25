@@ -7,14 +7,12 @@ import { apiFetch, getApiBaseUrl } from "@/lib/api-fetch";
 import { getEnv } from "@/lib/env";
 import { hasSessionCookie } from "@/lib/session-cookie";
 
-/** Better Auth's `get-session` answers `null` when the cookie's session is gone. */
 const sessionSchema = z
   .object({ user: z.object({ name: z.string(), email: z.string() }) })
   .nullable();
 
 const authUrlOf = async (endpoint: string) => `${await getApiBaseUrl()}/auth/${endpoint}`;
 
-/** The signed-in staff member's session, or null; only the API knows whether a cookie is valid. */
 export const getStaffSession = async () => {
   const cookieStore = await cookies();
   if (!hasSessionCookie(cookieStore)) return null;
@@ -30,11 +28,6 @@ export const getStaffSession = async () => {
   return session;
 };
 
-/**
- * Posts to Better Auth from a server action. The browser never talks to the API, so the action
- * sends the site's Origin, the visitor's IP for the rate limit and Turnstile, and the Turnstile
- * token, and passes the answered cookies on to the browser.
- */
 export const sendAuthRequest = async ({
   endpoint,
   body,

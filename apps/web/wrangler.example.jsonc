@@ -12,7 +12,13 @@
     "BAKERY_TIME_ZONE": "Europe/Prague",
     "WEB_ORIGIN": "https://craftsman-bakery.example.com"
   },
-  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+    "html_handling": "none",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/", "/cancel", "/staff", "/staff/*"]
+  },
   "services": [
     { "binding": "API", "service": "craftsman-bakery-api" },
     { "binding": "WORKER_SELF_REFERENCE", "service": "craftsman-bakery-web" }

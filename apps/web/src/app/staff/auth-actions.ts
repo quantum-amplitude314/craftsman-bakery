@@ -5,7 +5,6 @@ import { z } from "zod";
 import { sendAuthRequest } from "@/lib/auth";
 import { readSignInForm, type SignInState, signInFailureOf } from "@/lib/sign-in-form";
 
-/** Better Auth's error body; anything else reads as no code. */
 const authErrorSchema = z.object({ code: z.string().optional() }).catch({});
 
 export const signIn = async (previous: SignInState, formData: FormData): Promise<SignInState> => {
@@ -40,7 +39,6 @@ export const signIn = async (previous: SignInState, formData: FormData): Promise
   redirect("/staff");
 };
 
-/** Better Auth clears the cookies even when the session is already gone. */
 export const signOut = async () => {
   const response = await sendAuthRequest({ endpoint: "sign-out", body: {} });
   if (!response.ok) throw new Error(`Sign-out failed with ${response.status}`);

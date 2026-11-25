@@ -5,13 +5,9 @@ import type { Db } from "../db/client.ts";
 import { account, session, user, verification } from "../db/schema.ts";
 
 const SESSION_DAYS = 7;
-/** Better Auth's captcha header; its own plugin is not used, so tests verify through a fake. */
 const TURNSTILE_HEADER = "x-captcha-response";
 
-/**
- * Staff only: accounts are seeded, so sign-up is closed. Sign-in needs a passing Turnstile token:
- * the demo password is public, so the check is what keeps scripts out.
- */
+/** Staff only: accounts are seeded, so sign-up is closed. */
 export const createAuth = ({
   db,
   secret,

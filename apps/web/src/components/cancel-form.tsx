@@ -1,6 +1,7 @@
 "use client";
 
 import { CODE_LENGTH } from "@craftsman-bakery/contracts";
+import { useSearchParams } from "next/navigation";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { cancel } from "@/app/cancel-action";
 import { FormMessage } from "@/components/form-message";
@@ -113,4 +114,11 @@ export function CancelForm({ initialCode }: { initialCode: string }) {
       </Button>
     </form>
   );
+}
+
+export function CancelFormFromQuery() {
+  const searchParams = useSearchParams();
+  const code = searchParams.get("code") ?? "";
+
+  return <CancelForm initialCode={code} />;
 }

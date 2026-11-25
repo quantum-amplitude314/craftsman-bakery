@@ -9,7 +9,7 @@ const clampQuantity = ({ value, max }: { value: number; max: number }) =>
 
 /**
  * − count + with 44 px targets. The count is a named input, so the form submits it; typing a number
- * works too and is clamped to 0..max. The product row owns the count, to show what is left.
+ * works too and is clamped to 0..max.
  */
 export function QuantityStepper({
   id,

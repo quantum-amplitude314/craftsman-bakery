@@ -3,7 +3,6 @@ import { SignInForm } from "@/components/sign-in-form";
 
 export const metadata: Metadata = { title: "Staff sign-in · Craftsman Bakery" };
 
-/** Public on purpose, so anyone can try the staff pages; the demo seed creates this account. */
 const DEMO_STAFF = { email: "staff@craftsman-bakery.demo", password: "craftsman-bakery-demo" };
 
 export default function SignInPage() {

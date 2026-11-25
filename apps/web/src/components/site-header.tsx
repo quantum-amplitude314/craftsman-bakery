@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { type ReactNode, useSyncExternalStore } from "react";
 
 /** Past this many pixels the header leaves the photo and needs its own background. */
 const SCROLLED_PAST_PX = 8;
@@ -16,9 +16,9 @@ const readServerIsScrolled = () => false;
 
 /**
  * Fixed over the page's photo: transparent at the top, a blurred card background
- * once the page scrolls under it.
+ * once the page scrolls under it. `children` is the navigation, at the right end.
  */
-export function SiteHeader() {
+export function SiteHeader({ children }: { children?: ReactNode }) {
   const isScrolled = useSyncExternalStore(subscribeToScroll, readIsScrolled, readServerIsScrolled);
 
   return (
@@ -30,6 +30,7 @@ export function SiteHeader() {
         {/* biome-ignore lint/performance/noImgElement: a tiny SVG needs no optimisation */}
         <img src="/icon.svg" alt="" width={32} height={32} />
         <span className="font-heading font-semibold text-primary text-xl">Craftsman Bakery</span>
+        {children ? <nav className="ml-auto">{children}</nav> : null}
       </div>
     </header>
   );

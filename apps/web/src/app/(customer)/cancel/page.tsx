@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CancelForm } from "@/components/cancel-form";
+import { Suspense } from "react";
+import { CancelForm, CancelFormFromQuery } from "@/components/cancel-form";
 
 export const metadata: Metadata = { title: "Cancel a reservation · Craftsman Bakery" };
 
-export default async function CancelPage({ searchParams }: PageProps<"/cancel">) {
-  const { code } = await searchParams;
-  const initialCode = typeof code === "string" ? code : "";
-
+export default function CancelPage() {
   return (
     <section className="mx-auto max-w-md space-y-6 px-4 pt-24 pb-12">
       <div className="space-y-1">
@@ -17,7 +15,9 @@ export default async function CancelPage({ searchParams }: PageProps<"/cancel">)
           pickup day.
         </p>
       </div>
-      <CancelForm initialCode={initialCode} />
+      <Suspense fallback={<CancelForm initialCode="" />}>
+        <CancelFormFromQuery />
+      </Suspense>
       <p className="text-center text-muted-foreground text-sm">
         <Link href="/" className="text-primary underline underline-offset-4">
           Back to reservations
