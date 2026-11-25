@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { createAuth } from "./auth/auth.ts";
 import { createDb } from "./db/client.ts";
 import { createApiHandler } from "./http/handler.ts";
 import { createRequestContext } from "./http/request-context.ts";
@@ -31,6 +32,20 @@ app.get("/api/health", async (context) => {
 });
 
 app.route("/", teapot);
+
+app.on(["GET", "POST"], "/api/auth/*", async (context) => {
+  const {
+    HYPERDRIVE_COMMANDS: hyperdrive,
+    BETTER_AUTH_SECRET: secret,
+    WEB_ORIGIN: webOrigin,
+  } = context.env;
+  const { db, close } = createDb({ connectionString: hyperdrive.connectionString });
+  const auth = createAuth({ db, secret, baseURL: webOrigin, trustedOrigins: [webOrigin] });
+  const response = await auth.handler(context.req.raw);
+  context.executionCtx.waitUntil(close());
+
+  return response;
+});
 
 const apiHandler = createApiHandler();
 

@@ -14,7 +14,8 @@
       "typescript": "^7.0.2",
       "zod": "^4.6.7",
       "@orpc/openapi": "^1.16.5",
-      "@orpc/server": "^1.16.5"
+      "@orpc/server": "^1.16.5",
+      "better-auth": "^1.7.28"
     }
   },
   "scripts": {
@@ -26,7 +27,8 @@
     "db:up": "podman compose up -d --wait",
     "db:down": "podman compose down",
     "db:generate": "bun run --cwd apps/api db:generate",
-    "db:migrate": "bun run --cwd apps/api db:migrate"
+    "db:migrate": "bun run --cwd apps/api db:migrate",
+    "demo:seed": "bun run --cwd apps/api demo:seed"
   },
   "devDependencies": {
     "@socketsecurity/bun-security-scanner": "^1.1.3",

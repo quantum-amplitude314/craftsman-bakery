@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "test": "bun --env-file=.env.test test",
     "preview": "wrangler dev --port 3848",
-    "typegen": "wrangler types --config wrangler.example.jsonc"
+    "typegen": "wrangler types --config wrangler.example.jsonc",
+    "demo:seed": "bun --env-file=.env.development scripts/demo-seed.ts"
   },
   "dependencies": {
     "@acme-bakery/contracts": "workspace:*",
@@ -19,7 +20,8 @@
     "pg": "^8.23.1",
     "zod": "catalog:",
     "@orpc/openapi": "catalog:",
-    "@orpc/server": "catalog:"
+    "@orpc/server": "catalog:",
+    "better-auth": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "^1.4.5",

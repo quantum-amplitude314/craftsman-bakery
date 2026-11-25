@@ -7,7 +7,9 @@ export const createTestDb = () => createDb({ connectionString: readTestDatabaseU
 
 // Drizzle queries are lazy thenables, not Promises: await them so bun:test hooks run them.
 export const resetTables = async ({ db }: { db: Db }) => {
-  await db.execute(sql`truncate reservation_item, reservation, capacity, product`);
+  await db.execute(
+    sql`truncate reservation_item, reservation, capacity, product, verification, account, session, "user"`,
+  );
 };
 
 export const seedProduct = async ({ db, name }: { db: Db; name: string }) => {
