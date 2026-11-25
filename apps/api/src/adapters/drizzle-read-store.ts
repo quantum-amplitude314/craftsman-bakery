@@ -6,12 +6,22 @@ import type { ReservationReadStore } from "../queries/ports.ts";
 
 type PickupReservation = PickupList["reservations"][number];
 
+/** Set for the day, else the weekday default; null when the product is not offered. */
+const effectiveCapacity = sql`coalesce(${capacity.capacity}, ${defaultCapacity.capacity})`;
+
+const capacityOnDay = (pickupDay: string) =>
+  and(eq(capacity.productId, product.id), eq(capacity.pickupDay, pickupDay));
+
+const defaultOnWeekdayOf = (pickupDay: string) =>
+  and(
+    eq(defaultCapacity.productId, product.id),
+    eq(defaultCapacity.weekday, sql`extract(isodow from ${pickupDay}::date)::int`),
+  );
+
 export const createDrizzleReadStore = ({ db }: { db: Db }) => {
   const store: ReservationReadStore = {
-    availableOn: ({ pickupDay }) => {
-      const effectiveCapacity = sql`coalesce(${capacity.capacity}, ${defaultCapacity.capacity})`;
-
-      return db
+    availableOn: ({ pickupDay }) =>
+      db
         .select({
           productId: product.id,
           name: product.name,
@@ -21,20 +31,22 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
           ),
         })
         .from(product)
-        .leftJoin(
-          capacity,
-          and(eq(capacity.productId, product.id), eq(capacity.pickupDay, pickupDay)),
-        )
-        .leftJoin(
-          defaultCapacity,
-          and(
-            eq(defaultCapacity.productId, product.id),
-            eq(defaultCapacity.weekday, sql`extract(isodow from ${pickupDay}::date)::int`),
-          ),
-        )
+        .leftJoin(capacity, capacityOnDay(pickupDay))
+        .leftJoin(defaultCapacity, defaultOnWeekdayOf(pickupDay))
         .where(sql`${effectiveCapacity} is not null`)
-        .orderBy(asc(product.name));
-    },
+        .orderBy(asc(product.name)),
+    capacityOn: ({ pickupDay }) =>
+      db
+        .select({
+          productId: product.id,
+          name: product.name,
+          capacity: sql<number | null>`${effectiveCapacity}`,
+          reserved: sql<number>`coalesce(${capacity.reserved}, 0)`.mapWith(Number),
+        })
+        .from(product)
+        .leftJoin(capacity, capacityOnDay(pickupDay))
+        .leftJoin(defaultCapacity, defaultOnWeekdayOf(pickupDay))
+        .orderBy(asc(product.name)),
     bakeCountOn: ({ pickupDay }) =>
       db
         .select({

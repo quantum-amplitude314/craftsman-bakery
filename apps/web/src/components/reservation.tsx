@@ -1,8 +1,7 @@
 import { connection } from "next/server";
 import { ReservationForm } from "@/components/reservation-form";
 import { apiClient } from "@/lib/api";
-import { formatDay, formatWallClock, tomorrowIn } from "@/lib/bakery-day";
-import { getEnv } from "@/lib/env";
+import { formatDay, formatWallClock } from "@/lib/bakery-day";
 
 function ReservationHeading({ title, subtitle }: { title: string; subtitle: string }) {
   return (
@@ -16,7 +15,7 @@ function ReservationHeading({ title, subtitle }: { title: string; subtitle: stri
 export function ReservationSkeleton() {
   return (
     <>
-      <ReservationHeading title="Pickup tomorrow" subtitle="Loading what is left…" />
+      <ReservationHeading title="Next pickup" subtitle="Loading what is left…" />
       <div aria-hidden="true" className="h-96 animate-pulse rounded-4xl bg-card" />
     </>
   );
@@ -24,10 +23,8 @@ export function ReservationSkeleton() {
 
 export async function Reservation() {
   await connection();
-  const { BAKERY_TIME_ZONE: timeZone } = await getEnv();
-  const pickupDay = tomorrowIn({ now: new Date(), timeZone });
-  const availability = await apiClient.customer.availability({ pickupDay });
-  const { closesAt } = availability;
+  const availability = await apiClient.customer.availability({});
+  const { pickupDay, closesAt } = availability;
 
   return (
     <>

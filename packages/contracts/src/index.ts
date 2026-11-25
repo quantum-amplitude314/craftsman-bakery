@@ -8,4 +8,5 @@ export const contract = {
 
 export type Contract = typeof contract;
 
+export * from "./calendar-day.ts";
 export * from "./schemas.ts";

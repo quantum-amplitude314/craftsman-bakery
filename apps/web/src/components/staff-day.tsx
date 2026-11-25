@@ -1,8 +1,9 @@
-import type { BakeCount, PickupList } from "@craftsman-bakery/contracts";
+import type { BakeCount, DayCapacity, PickupList } from "@craftsman-bakery/contracts";
 import { ORPCError } from "@orpc/client";
 import Link from "next/link";
 import { connection } from "next/server";
 import { CancelReservationButton } from "@/components/cancel-reservation-button";
+import { CapacityRow } from "@/components/capacity-row";
 import { SessionExpired } from "@/components/session-expired";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,11 +32,12 @@ const pickupDayOf = async (choice: DayChoice) => {
 };
 
 const loadDay = async (pickupDay: string) => {
-  const [bakeCount, pickupList] = await Promise.all([
+  const [bakeCount, pickupList, dayCapacity] = await Promise.all([
     apiClient.staff.bakeCount({ pickupDay }),
     apiClient.staff.pickupList({ pickupDay }),
+    apiClient.staff.capacity({ pickupDay }),
   ]);
-  const day = { bakeCount, pickupList };
+  const day = { bakeCount, pickupList, dayCapacity };
 
   return day;
 };
@@ -85,6 +87,27 @@ function BakeCountCard({ products }: { products: BakeCount["products"] }) {
             ))}
           </ul>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function CapacityCard({ pickupDay, products }: DayCapacity) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Capacity</CardTitle>
+        <CardDescription>
+          How many customers can reserve: the weekday default until you change it, – when not
+          offered.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="divide-y divide-border">
+          {products.map((product) => (
+            <CapacityRow key={product.productId} pickupDay={pickupDay} product={product} />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -144,7 +167,7 @@ export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchP
     throw error;
   });
   if (!loaded) return <SessionExpired />;
-  const { bakeCount, pickupList } = loaded;
+  const { bakeCount, pickupList, dayCapacity } = loaded;
 
   return (
     <div className="space-y-6">
@@ -153,7 +176,10 @@ export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchP
         <DaySwitch current={choice} />
       </div>
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-        <BakeCountCard products={bakeCount.products} />
+        <div className="space-y-6">
+          <BakeCountCard products={bakeCount.products} />
+          <CapacityCard {...dayCapacity} />
+        </div>
         <PickupListCard reservations={pickupList.reservations} />
       </div>
     </div>

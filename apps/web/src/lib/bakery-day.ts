@@ -1,4 +1,4 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { addDays } from "@craftsman-bakery/contracts";
 
 /** Today's date as YYYY-MM-DD on the bakery's clock; the Worker itself runs in UTC. */
 export const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
@@ -13,15 +13,6 @@ export const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
   const today = `${partOf("year")}-${partOf("month")}-${partOf("day")}`;
 
   return today;
-};
-
-/** Calendar days on YYYY-MM-DD dates, computed in UTC so clock changes never shift them. */
-export const addDays = ({ day, days }: { day: string; days: number }) => {
-  const shifted = new Date(Date.parse(`${day}T00:00:00Z`) + days * DAY_MS)
-    .toISOString()
-    .slice(0, 10);
-
-  return shifted;
 };
 
 export const tomorrowIn = ({ now, timeZone }: { now: Date; timeZone: string }) =>

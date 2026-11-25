@@ -87,3 +87,17 @@ export const capacityInputSchema = z.object({
   capacity: z.int().nonnegative(),
 });
 export type CapacityInput = z.infer<typeof capacityInputSchema>;
+
+export const dayCapacitySchema = z.object({
+  pickupDay: pickupDaySchema,
+  products: z.array(
+    z.object({
+      productId: productIdSchema,
+      name: z.string(),
+      /** Set for the day, else the weekday default; null when the product is not offered. */
+      capacity: z.int().nonnegative().nullable(),
+      reserved: z.int().nonnegative(),
+    }),
+  ),
+});
+export type DayCapacity = z.infer<typeof dayCapacitySchema>;

@@ -2,7 +2,14 @@ import { afterAll, beforeEach, describe, expect, test } from "bun:test";
 import { createDrizzleWriteStore } from "../src/adapters/drizzle-write-store.ts";
 import { reserveItems } from "../src/commands/reserve-items.ts";
 import { createApiTestContext, sendApi } from "./api.ts";
-import { codesFrom, createTestDb, resetTables, seedCapacity, seedProduct } from "./helpers.ts";
+import {
+  codesFrom,
+  createTestDb,
+  resetTables,
+  seedCapacity,
+  seedHistory,
+  seedProduct,
+} from "./helpers.ts";
 
 const { db, close } = createTestDb();
 const store = createDrizzleWriteStore({ db });
@@ -111,11 +118,42 @@ describe("staff queries", () => {
     });
   });
 
-  test("both answer 401 without a staff session", async () => {
+  test("the capacity lists every product: set for the day, the default, or not offered", async () => {
+    const bread = await seedProduct({ db, name: "Bread" });
+    await seedCapacity({ db, productId: bread, pickupDay, limit: 20, reserved: 3 });
+    const croissant = await seedProduct({ db, name: "Croissant" });
+    await seedHistory({
+      db,
+      productId: croissant,
+      records: [
+        { day: "2026-12-17", baked: 40 },
+        { day: "2026-12-10", baked: 40 },
+      ],
+    });
+    const rye = await seedProduct({ db, name: "Rye" });
+
+    const { status, body } = await sendApi({
+      method: "GET",
+      path: `/staff/capacity?pickupDay=${pickupDay}`,
+      context: staff,
+    });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({
+      pickupDay,
+      products: [
+        { productId: bread, name: "Bread", capacity: 20, reserved: 3 },
+        { productId: croissant, name: "Croissant", capacity: 12, reserved: 0 },
+        { productId: rye, name: "Rye", capacity: null, reserved: 0 },
+      ],
+    });
+  });
+
+  test("all answer 401 without a staff session", async () => {
     const visitor = createApiTestContext({ db });
 
     const statuses = await Promise.all(
-      ["bake-count", "pickup-list"].map(async (path) => {
+      ["bake-count", "pickup-list", "capacity"].map(async (path) => {
         const { status } = await sendApi({
           method: "GET",
           path: `/staff/${path}?pickupDay=${pickupDay}`,
@@ -126,6 +164,6 @@ describe("staff queries", () => {
       }),
     );
 
-    expect(statuses).toEqual([401, 401]);
+    expect(statuses).toEqual([401, 401, 401]);
   });
 });

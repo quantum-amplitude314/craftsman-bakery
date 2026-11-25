@@ -6,7 +6,7 @@ import { createDb } from "./db/client.ts";
 import { createApiHandler } from "./http/handler.ts";
 import { createRequestContext } from "./http/request-context.ts";
 import { teapot } from "./http/teapot.ts";
-import { isReservationClosed, wallClock } from "./rules/cutoff.ts";
+import { nextOpenPickupDay, wallClock } from "./rules/cutoff.ts";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -20,13 +20,11 @@ app.get("/api/health", async (context) => {
   const { rows } = await db.execute(sql`select now() as database_time`);
   context.executionCtx.waitUntil(close());
   const now = new Date();
-  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const health = {
     databaseTime: rows[0]?.database_time,
     workerTime: now.toISOString(),
     bakeryClock: wallClock({ instant: now, timeZone }),
-    tomorrow,
-    tomorrowClosed: isReservationClosed({ now, pickupDay: tomorrow, cutoff: { timeZone, time } }),
+    nextPickupDay: nextOpenPickupDay({ now, cutoff: { timeZone, time } }),
   };
 
   return context.json(health);

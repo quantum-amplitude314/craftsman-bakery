@@ -16,9 +16,9 @@ export const customerContract = {
     .route({
       method: "GET",
       path: "/availability",
-      summary: "What can still be reserved for a pickup day",
+      summary: "What can still be reserved for a pickup day, by default the next one still open",
     })
-    .input(z.object({ pickupDay: pickupDaySchema }))
+    .input(z.object({ pickupDay: pickupDaySchema.optional() }))
     .output(availabilitySchema),
   reserve: oc
     .route({

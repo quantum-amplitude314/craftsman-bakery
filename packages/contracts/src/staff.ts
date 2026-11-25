@@ -11,6 +11,7 @@ import {
   bakeCountSchema,
   capacityInputSchema,
   codeSchema,
+  dayCapacitySchema,
   pickupDaySchema,
   pickupListSchema,
   reservationInputSchema,
@@ -48,6 +49,15 @@ export const staffContract = {
     })
     .input(capacityInputSchema)
     .errors({ ...capacityBelowReserved, ...notFound, ...unauthorized }),
+  capacity: oc
+    .route({
+      method: "GET",
+      path: "/staff/capacity",
+      summary: "Each product's capacity and what is reserved for a pickup day",
+    })
+    .input(pickupDayInputSchema)
+    .output(dayCapacitySchema)
+    .errors(unauthorized),
   bakeCount: oc
     .route({
       method: "GET",

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { isReservationClosed } from "../src/rules/cutoff.ts";
+import { isReservationClosed, nextOpenPickupDay } from "../src/rules/cutoff.ts";
 
 const cutoff = { timeZone: "Europe/Prague", time: "18:00" };
 const closedAt = ({ now, pickupDay }: { now: string; pickupDay: string }) =>
@@ -28,5 +28,23 @@ describe("cutoff at 18:00 Prague time the day before pickup", () => {
 
   test("a past pickup day is closed", () => {
     expect(closedAt({ now: "2026-07-20T08:00:00Z", pickupDay: "2026-07-15" })).toBe(true);
+  });
+});
+
+describe("next open pickup day", () => {
+  const nextAt = (now: string) => nextOpenPickupDay({ now: new Date(now), cutoff });
+
+  test("is tomorrow until the cutoff, then the day after", () => {
+    expect(nextAt("2026-11-25T16:59:59Z")).toBe("2026-11-26");
+    expect(nextAt("2026-11-25T17:00:00Z")).toBe("2026-11-27");
+  });
+
+  test("reads the day on the bakery's clock, not in UTC", () => {
+    expect(nextAt("2026-11-25T23:30:00Z")).toBe("2026-11-27");
+  });
+
+  test("across a month and a year end", () => {
+    expect(nextAt("2026-11-30T17:00:00Z")).toBe("2026-12-02");
+    expect(nextAt("2026-12-31T17:00:00Z")).toBe("2027-01-02");
   });
 });

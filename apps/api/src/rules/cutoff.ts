@@ -1,12 +1,6 @@
+import { addDays } from "@craftsman-bakery/contracts";
+
 export type CutoffConfig = { timeZone: string; time: string };
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const dayBefore = (day: string) => {
-  const previousDay = new Date(Date.parse(`${day}T00:00:00Z`) - DAY_MS).toISOString().slice(0, 10);
-
-  return previousDay;
-};
 
 /** "2026-07-14T17:59" on the given zone's clock. */
 export const wallClock = ({ instant, timeZone }: { instant: Date; timeZone: string }) => {
@@ -28,7 +22,7 @@ export const wallClock = ({ instant, timeZone }: { instant: Date; timeZone: stri
 
 /** "2026-07-14T18:00" on the bakery's clock for pickup on 2026-07-15. */
 export const closesAtOf = ({ pickupDay, cutoff }: { pickupDay: string; cutoff: CutoffConfig }) =>
-  `${dayBefore(pickupDay)}T${cutoff.time}`;
+  `${addDays({ day: pickupDay, days: -1 })}T${cutoff.time}`;
 
 export const isReservationClosed = ({
   now,
@@ -43,4 +37,16 @@ export const isReservationClosed = ({
   const closed = wallClock({ instant: now, timeZone }) >= closesAtOf({ pickupDay, cutoff });
 
   return closed;
+};
+
+/** Tomorrow on the bakery's clock until its cutoff, then the day after. */
+export const nextOpenPickupDay = ({ now, cutoff }: { now: Date; cutoff: CutoffConfig }) => {
+  const { timeZone } = cutoff;
+  const [today = ""] = wallClock({ instant: now, timeZone }).split("T");
+  const tomorrow = addDays({ day: today, days: 1 });
+  const pickupDay = isReservationClosed({ now, pickupDay: tomorrow, cutoff })
+    ? addDays({ day: tomorrow, days: 1 })
+    : tomorrow;
+
+  return pickupDay;
 };

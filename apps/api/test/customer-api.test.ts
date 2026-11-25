@@ -44,6 +44,21 @@ describe("customer API", () => {
     });
   });
 
+  test("GET /availability without a day answers for the next one still open", async () => {
+    const dayAfter = "2026-12-25";
+    const bread = await seedProduct({ db, name: "Bread" });
+    await seedCapacity({ db, productId: bread, pickupDay: dayAfter, limit: 5 });
+
+    const { status, body } = await send({
+      method: "GET",
+      path: "/availability",
+      context: contextWith({ now: "2026-12-23T17:00:00Z" }),
+    });
+
+    expect(status).toBe(200);
+    expect(body).toMatchObject({ pickupDay: dayAfter, closesAt: "2026-12-24T18:00" });
+  });
+
   test("POST /reservations reserves and answers 201 with the code", async () => {
     const bread = await seedProduct({ db, name: "Bread" });
     await seedCapacity({ db, productId: bread, pickupDay, limit: 5 });
