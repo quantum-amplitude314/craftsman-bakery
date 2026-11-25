@@ -17,7 +17,9 @@
     "drizzle-orm": "^0.45.4",
     "hono": "^4.13.22",
     "pg": "^8.23.1",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "^1.4.5",

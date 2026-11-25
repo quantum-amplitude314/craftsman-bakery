@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "./db/client.ts";
+import { createApiHandler } from "./http/handler.ts";
+import { createRequestContext } from "./http/request-context.ts";
 import { isReservationClosed, wallClock } from "./rules/cutoff.ts";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -25,6 +27,20 @@ app.get("/api/health", async (context) => {
   };
 
   return context.json(health);
+});
+
+const apiHandler = createApiHandler();
+
+app.all("/api/*", async (context) => {
+  const { raw: request } = context.req;
+  const { context: apiContext, close } = createRequestContext({ env: context.env, request });
+  const { matched, response } = await apiHandler.handle(request, {
+    prefix: "/api",
+    context: apiContext,
+  });
+  context.executionCtx.waitUntil(close());
+
+  return matched ? response : context.notFound();
 });
 
 export default app;
