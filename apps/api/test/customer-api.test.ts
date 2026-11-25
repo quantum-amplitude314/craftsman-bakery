@@ -151,6 +151,47 @@ describe("customer API", () => {
     expect(await reservedOf({ db, productId: bread, pickupDay })).toBe(0);
   });
 
+  test("POST /reservations/{code}/cancel cancels, with the code in any case", async () => {
+    const bread = await seedProduct({ db, name: "Bread" });
+    await seedCapacity({ db, productId: bread, pickupDay, limit: 5 });
+    await send({
+      method: "POST",
+      path: "/reservations",
+      body: reservationBody({ productId: bread, quantity: 2 }),
+    });
+
+    const { status } = await send({
+      method: "POST",
+      path: "/reservations/k7m2/cancel",
+      body: { turnstileToken: "token" },
+    });
+
+    expect(status).toBe(204);
+    expect(await reservedOf({ db, productId: bread, pickupDay })).toBe(0);
+  });
+
+  test("POST /reservations/{code}/cancel answers 404 for an unknown code", async () => {
+    const { status, body } = await send({
+      method: "POST",
+      path: "/reservations/QQQQ/cancel",
+      body: { turnstileToken: "token" },
+    });
+
+    expect(status).toBe(404);
+    expect(body).toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  test("POST /reservations/{code}/cancel answers 403 when Turnstile fails", async () => {
+    const { status } = await send({
+      method: "POST",
+      path: "/reservations/K7M2/cancel",
+      body: { turnstileToken: "token" },
+      context: contextWith({ turnstilePasses: false }),
+    });
+
+    expect(status).toBe(403);
+  });
+
   test("POST /reservations answers 400 on invalid input", async () => {
     const bread = await seedProduct({ db, name: "Bread" });
 

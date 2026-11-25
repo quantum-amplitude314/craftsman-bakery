@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { createDb } from "./db/client.ts";
 import { createApiHandler } from "./http/handler.ts";
 import { createRequestContext } from "./http/request-context.ts";
+import { teapot } from "./http/teapot.ts";
 import { isReservationClosed, wallClock } from "./rules/cutoff.ts";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -28,6 +29,8 @@ app.get("/api/health", async (context) => {
 
   return context.json(health);
 });
+
+app.route("/", teapot);
 
 const apiHandler = createApiHandler();
 

@@ -1,6 +1,7 @@
 import { contract } from "@acme-bakery/contracts";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { implement } from "@orpc/server";
+import { cancelReservation } from "../commands/cancel-reservation.ts";
 import type { ReservationWriteStore } from "../commands/ports.ts";
 import { reserveItems } from "../commands/reserve-items.ts";
 import { getAvailability } from "../queries/availability.ts";
@@ -23,6 +24,7 @@ const implementedContract = {
   customer: {
     availability: contract.customer.availability,
     reserve: contract.customer.reserve,
+    cancel: contract.customer.cancel,
   },
 };
 
@@ -55,6 +57,28 @@ const router = api.router({
           const availability = await getAvailability({ store: freshReadStore, cutoff, pickupDay });
           throw errors.CAPACITY_EXCEEDED({ data: availability });
         }
+        default:
+          throw outcome satisfies never;
+      }
+    }),
+    cancel: api.customer.cancel.handler(async ({ input, context, errors }) => {
+      const { code, turnstileToken } = input;
+      const { writeStore, cutoff, now, verifyTurnstile } = context;
+      if (!(await verifyTurnstile({ token: turnstileToken }))) throw errors.TURNSTILE_FAILED();
+
+      const outcome = await cancelReservation({
+        store: writeStore,
+        now: now(),
+        cutoff,
+        code,
+        cancelledBy: "customer",
+      });
+      if (outcome.ok) return;
+      switch (outcome.failure) {
+        case "NOT_FOUND":
+          throw errors.NOT_FOUND();
+        case "RESERVATIONS_CLOSED":
+          throw errors.RESERVATIONS_CLOSED();
         default:
           throw outcome satisfies never;
       }
