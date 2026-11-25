@@ -5,6 +5,8 @@ import { cancelReservation } from "../commands/cancel-reservation.ts";
 import type { ReservationWriteStore } from "../commands/ports.ts";
 import { reserveItems } from "../commands/reserve-items.ts";
 import { getAvailability } from "../queries/availability.ts";
+import { getBakeCount } from "../queries/bake-count.ts";
+import { getPickupList } from "../queries/pickup-list.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
 import type { CutoffConfig } from "../rules/cutoff.ts";
 
@@ -12,7 +14,7 @@ export type ApiContext = {
   writeStore: ReservationWriteStore;
   /** Through the cached Hyperdrive: a stale read is caught by the 409 on submit. */
   readStore: ReservationReadStore;
-  /** Uncached, for the availability a 409 sends back. */
+  /** Uncached: the availability a 409 sends back, and staff reads. */
   freshReadStore: ReservationReadStore;
   cutoff: CutoffConfig;
   now: () => Date;
@@ -30,6 +32,8 @@ const implementedContract = {
   staff: {
     reserve: contract.staff.reserve,
     cancel: contract.staff.cancel,
+    bakeCount: contract.staff.bakeCount,
+    pickupList: contract.staff.pickupList,
   },
 };
 
@@ -134,6 +138,18 @@ const router = api.router({
         default:
           throw outcome satisfies never;
       }
+    }),
+    bakeCount: api.staff.bakeCount.handler(async ({ input: { pickupDay }, context, errors }) => {
+      const { isStaff, freshReadStore } = context;
+      if (!(await isStaff())) throw errors.UNAUTHORIZED();
+
+      return getBakeCount({ store: freshReadStore, pickupDay });
+    }),
+    pickupList: api.staff.pickupList.handler(async ({ input: { pickupDay }, context, errors }) => {
+      const { isStaff, freshReadStore } = context;
+      if (!(await isStaff())) throw errors.UNAUTHORIZED();
+
+      return getPickupList({ store: freshReadStore, pickupDay });
     }),
   },
 });
