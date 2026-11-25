@@ -17,17 +17,21 @@ export const seedProduct = async ({ db, name }: { db: Db; name: string }) => {
   return created.id;
 };
 
-export const seedCapacity = ({
+export const seedCapacity = async ({
   db,
   productId,
   pickupDay,
   limit,
+  reserved = 0,
 }: {
   db: Db;
   productId: string;
   pickupDay: string;
   limit: number;
-}) => db.insert(capacity).values({ productId, pickupDay, capacity: limit });
+  reserved?: number;
+}) => {
+  await db.insert(capacity).values({ productId, pickupDay, capacity: limit, reserved });
+};
 
 export const reservedOf = async ({
   db,

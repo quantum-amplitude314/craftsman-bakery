@@ -8,7 +8,7 @@ const dayBefore = (day: string) => {
   return previousDay;
 };
 
-/** "2026-07-14 17:59" on the given zone's clock. */
+/** "2026-07-14T17:59" on the given zone's clock. */
 export const wallClock = ({ instant, timeZone }: { instant: Date; timeZone: string }) => {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -21,21 +21,26 @@ export const wallClock = ({ instant, timeZone }: { instant: Date; timeZone: stri
   }).formatToParts(instant);
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((candidate) => candidate.type === type)?.value;
-  const text = `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}`;
+  const text = `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
 
   return text;
 };
 
+/** "2026-07-14T18:00" on the bakery's clock for pickup on 2026-07-15. */
+export const closesAtOf = ({ pickupDay, cutoff }: { pickupDay: string; cutoff: CutoffConfig }) =>
+  `${dayBefore(pickupDay)}T${cutoff.time}`;
+
 export const isReservationClosed = ({
   now,
   pickupDay,
-  cutoff: { timeZone, time },
+  cutoff,
 }: {
   now: Date;
   pickupDay: string;
   cutoff: CutoffConfig;
 }) => {
-  const closed = wallClock({ instant: now, timeZone }) >= `${dayBefore(pickupDay)} ${time}`;
+  const { timeZone } = cutoff;
+  const closed = wallClock({ instant: now, timeZone }) >= closesAtOf({ pickupDay, cutoff });
 
   return closed;
 };

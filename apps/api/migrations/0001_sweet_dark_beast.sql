@@ -1,0 +1,1 @@
+CREATE VIEW "public"."availability" AS (select "capacity"."product_id", "product"."name", "capacity"."pickup_day", "capacity"."capacity" - "capacity"."reserved" as available from "capacity" inner join "product" on "product"."id" = "capacity"."product_id");

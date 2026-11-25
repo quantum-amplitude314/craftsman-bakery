@@ -43,7 +43,8 @@ export type ReservationReceipt = z.infer<typeof reservationReceiptSchema>;
 
 export const availabilitySchema = z.object({
   pickupDay: pickupDaySchema,
-  closesAt: z.iso.datetime({ offset: true }),
+  /** On the bakery's clock, like 2026-12-23T18:00. */
+  closesAt: z.iso.datetime({ local: true }),
   products: z.array(
     z.object({
       productId: productIdSchema,

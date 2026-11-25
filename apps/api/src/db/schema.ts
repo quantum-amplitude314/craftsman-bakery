@@ -4,6 +4,7 @@ import {
   date,
   integer,
   pgTable,
+  pgView,
   primaryKey,
   text,
   timestamp,
@@ -58,4 +59,14 @@ export const reservationItem = pgTable(
     primaryKey({ columns: [table.reservationCode, table.productId] }),
     check("reservation_item_quantity_positive", sql`${table.quantity} > 0`),
   ],
+);
+
+/** What is left of each product offered on a pickup day. */
+export const availability = pgView("availability", {
+  productId: uuid().notNull(),
+  name: text().notNull(),
+  pickupDay: date().notNull(),
+  available: integer().notNull(),
+}).as(
+  sql`select ${capacity.productId}, ${product.name}, ${capacity.pickupDay}, ${capacity.capacity} - ${capacity.reserved} as available from ${capacity} inner join ${product} on ${product.id} = ${capacity.productId}`,
 );
