@@ -7,13 +7,14 @@ export const reserve = async (
   previous: ReserveState,
   formData: FormData,
 ): Promise<ReserveState> => {
-  const attempt = previous.attempt + 1;
   const form = readReservationForm(formData);
   if (form.status === "invalid") {
-    const invalid: ReserveState = { ...form, attempt };
+    const invalid: ReserveState = { ...form, attempt: previous.attempt };
 
     return invalid;
   }
+
+  const attempt = previous.attempt + 1;
 
   const { input } = form;
   try {

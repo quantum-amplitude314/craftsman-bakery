@@ -4,13 +4,14 @@ import { apiClient } from "@/lib/api";
 import { type CancelState, cancelFailureOf, readCancelForm } from "@/lib/cancel-form";
 
 export const cancel = async (previous: CancelState, formData: FormData): Promise<CancelState> => {
-  const attempt = previous.attempt + 1;
   const form = readCancelForm(formData);
   if (form.status === "invalid") {
-    const invalid: CancelState = { ...form, attempt };
+    const invalid: CancelState = { ...form, attempt: previous.attempt };
 
     return invalid;
   }
+
+  const attempt = previous.attempt + 1;
 
   const { input } = form;
   try {

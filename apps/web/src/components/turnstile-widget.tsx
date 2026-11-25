@@ -1,12 +1,13 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { publicEnv } from "@/lib/public-env";
 
 /** Explicit-render API of https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit */
 type TurnstileApi = {
   render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
+  reset: (widgetId: string) => void;
   remove: (widgetId: string) => void;
 };
 
@@ -33,38 +34,51 @@ const { NEXT_PUBLIC_TURNSTILE_SITE_KEY: siteKey } = publicEnv;
 
 /**
  * Always-visible Turnstile widget, so the demo shows it. It renders inside the surrounding form,
- * where Turnstile adds the `cf-turnstile-response` input. A token is single-use: remount the
- * widget with a new `key` after each submission.
+ * where Turnstile adds the `cf-turnstile-response` input. A token is single-use: a new `attempt`
+ * resets the widget in place for a fresh one.
  */
 export function TurnstileWidget({
+  attempt,
   onTokenChange,
 }: {
+  attempt: number;
   onTokenChange: (token: string | null) => void;
 }) {
   const [isScriptReady, setIsScriptReady] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const reportToken = useEffectEvent((token: string | null) => onTokenChange(token));
+  const widgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const { turnstile } = window;
     if (!isScriptReady || !container || !turnstile) return;
 
-    const clearToken = () => onTokenChange(null);
+    const clearToken = () => reportToken(null);
     const widgetId = turnstile.render(container, {
       sitekey: siteKey,
       appearance: "always",
       theme: "light",
       size: "flexible",
-      callback: onTokenChange,
+      callback: reportToken,
       "expired-callback": clearToken,
       "error-callback": clearToken,
       "timeout-callback": clearToken,
     });
+    widgetIdRef.current = widgetId;
 
     return () => {
       turnstile.remove(widgetId);
+      widgetIdRef.current = null;
       clearToken();
     };
-  }, [container, isScriptReady, onTokenChange]);
+  }, [container, isScriptReady]);
+
+  useEffect(() => {
+    const { current: widgetId } = widgetIdRef;
+    if (attempt === 0 || !widgetId) return;
+    window.turnstile?.reset(widgetId);
+    reportToken(null);
+  }, [attempt]);
 
   return (
     <>

@@ -2,13 +2,15 @@
 
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { signIn } from "@/app/staff/auth-actions";
+import { FieldError } from "@/components/field-error";
 import { FormMessage } from "@/components/form-message";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { SignInFormField, SignInState } from "@/lib/sign-in-form";
+import { readSignInForm, type SignInFormField, type SignInState } from "@/lib/sign-in-form";
+import { focusFirstInvalid, useFieldErrors } from "@/lib/use-field-errors";
 
 const INITIAL_STATE: SignInState = { status: "editing", attempt: 0 };
 
@@ -46,16 +48,25 @@ function StatusMessage({ state }: { state: SignInState }) {
 export function SignInForm({ email, password }: { email: string; password: string }) {
   const [state, dispatch, pending] = useActionState(signIn, INITIAL_STATE);
   const [hasToken, setHasToken] = useState(false);
+  const { setInvalidFields, errorOf, clearError, ariaOf } = useFieldErrors(FIELD_HINTS);
 
   // An action passed as `action` resets the form after it runs; submitting by hand keeps the input.
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const { currentTarget: formElement } = event;
+    const formData = new FormData(formElement);
+    const form = readSignInForm(formData);
+    if (form.status === "invalid") {
+      setInvalidFields(form.invalidFields);
+      focusFirstInvalid(formElement);
+      return;
+    }
+    setInvalidFields([]);
     startTransition(() => dispatch(formData));
   };
 
   return (
-    <form onSubmit={submit} className="space-y-6">
+    <form onSubmit={submit} noValidate className="space-y-6">
       <Card>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -67,7 +78,10 @@ export function SignInForm({ email, password }: { email: string; password: strin
               autoComplete="username"
               defaultValue={email}
               required
+              onChange={() => clearError("email")}
+              {...ariaOf("email")}
             />
+            <FieldError field="email" message={errorOf("email")} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
@@ -78,11 +92,21 @@ export function SignInForm({ email, password }: { email: string; password: strin
               autoComplete="current-password"
               defaultValue={password}
               required
+              onChange={() => clearError("password")}
+              {...ariaOf("password")}
             />
+            <FieldError field="password" message={errorOf("password")} />
           </div>
         </CardContent>
       </Card>
-      <TurnstileWidget key={state.attempt} onTokenChange={(token) => setHasToken(token !== null)} />
+      <TurnstileWidget
+        attempt={state.attempt}
+        onTokenChange={(token) => {
+          setHasToken(token !== null);
+          clearError("turnstile");
+        }}
+      />
+      <FieldError field="turnstile" message={errorOf("turnstile")} />
       <div aria-live="polite">
         <StatusMessage state={state} />
       </div>

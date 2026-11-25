@@ -8,13 +8,14 @@ import { readSignInForm, type SignInState, signInFailureOf } from "@/lib/sign-in
 const authErrorSchema = z.object({ code: z.string().optional() }).catch({});
 
 export const signIn = async (previous: SignInState, formData: FormData): Promise<SignInState> => {
-  const attempt = previous.attempt + 1;
   const form = readSignInForm(formData);
   if (form.status === "invalid") {
-    const invalid: SignInState = { ...form, attempt };
+    const invalid: SignInState = { ...form, attempt: previous.attempt };
 
     return invalid;
   }
+
+  const attempt = previous.attempt + 1;
 
   const { turnstileToken, ...credentials } = form.input;
   try {

@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { reserve } from "@/app/reserve-action";
+import { FieldError } from "@/components/field-error";
 import { FormMessage } from "@/components/form-message";
 import { QuantityStepper } from "@/components/quantity-stepper";
 import { TurnstileWidget } from "@/components/turnstile-widget";
@@ -16,7 +17,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDay, formatWallClock } from "@/lib/bakery-day";
-import { type FormField, quantityFieldOf, type ReserveState } from "@/lib/reservation-form";
+import {
+  type FormField,
+  quantityFieldOf,
+  type ReserveState,
+  readReservationForm,
+} from "@/lib/reservation-form";
+import { focusFirstInvalid, useFieldErrors } from "@/lib/use-field-errors";
 
 const INITIAL_STATE: ReserveState = { status: "editing", attempt: 0 };
 
@@ -98,9 +105,19 @@ function Receipt({
   );
 }
 
-function ProductRow({ product }: { product: Availability["products"][number] }) {
+function ProductRow({
+  product,
+  onQuantityChange,
+}: {
+  product: Availability["products"][number];
+  onQuantityChange: () => void;
+}) {
   const { productId, name, description, available } = product;
   const [quantity, setQuantity] = useState(0);
+  const changeQuantity = (next: number) => {
+    setQuantity(next);
+    onQuantityChange();
+  };
   const left = Math.max(0, available - quantity);
 
   return (
@@ -120,7 +137,7 @@ function ProductRow({ product }: { product: Availability["products"][number] }) 
         productName={name}
         max={available}
         quantity={quantity}
-        onQuantityChange={setQuantity}
+        onQuantityChange={changeQuantity}
       />
     </li>
   );
@@ -129,6 +146,7 @@ function ProductRow({ product }: { product: Availability["products"][number] }) 
 export function ReservationForm({ availability }: { availability: Availability }) {
   const [state, dispatch, pending] = useActionState(reserve, INITIAL_STATE);
   const [hasToken, setHasToken] = useState(false);
+  const { setInvalidFields, errorOf, clearError, ariaOf } = useFieldErrors(FIELD_HINTS);
 
   if (state.status === "reserved") {
     return <Receipt receipt={state.receipt} closesAt={availability.closesAt} />;
@@ -140,12 +158,20 @@ export function ReservationForm({ availability }: { availability: Availability }
   // An action passed as `action` resets the form after it runs; submitting by hand keeps the input.
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const { currentTarget: formElement } = event;
+    const formData = new FormData(formElement);
+    const form = readReservationForm(formData);
+    if (form.status === "invalid") {
+      setInvalidFields(form.invalidFields);
+      focusFirstInvalid(formElement);
+      return;
+    }
+    setInvalidFields([]);
     startTransition(() => dispatch(formData));
   };
 
   return (
-    <form onSubmit={submit} className="space-y-6">
+    <form onSubmit={submit} noValidate className="space-y-6">
       <input type="hidden" name="pickupDay" value={pickupDay} />
       {/* Desktop: the order on the left, details and submitting on the right. */}
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
@@ -156,9 +182,14 @@ export function ReservationForm({ availability }: { availability: Availability }
           <CardContent>
             <ul className="divide-y divide-border">
               {products.map((product) => (
-                <ProductRow key={product.productId} product={product} />
+                <ProductRow
+                  key={product.productId}
+                  product={product}
+                  onQuantityChange={() => clearError("items")}
+                />
               ))}
             </ul>
+            <FieldError field="items" message={errorOf("items")} />
           </CardContent>
         </Card>
         <div className="space-y-6">
@@ -176,7 +207,10 @@ export function ReservationForm({ availability }: { availability: Availability }
                   maxLength={NAME_MAX_LENGTH}
                   required
                   className="h-11"
+                  onChange={() => clearError("name")}
+                  {...ariaOf("name")}
                 />
+                <FieldError field="name" message={errorOf("name")} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
@@ -187,14 +221,21 @@ export function ReservationForm({ availability }: { availability: Availability }
                   autoComplete="tel"
                   required
                   className="h-11"
+                  onChange={() => clearError("phone")}
+                  {...ariaOf("phone")}
                 />
+                <FieldError field="phone" message={errorOf("phone")} />
               </div>
             </CardContent>
           </Card>
           <TurnstileWidget
-            key={state.attempt}
-            onTokenChange={(token) => setHasToken(token !== null)}
+            attempt={state.attempt}
+            onTokenChange={(token) => {
+              setHasToken(token !== null);
+              clearError("turnstile");
+            }}
           />
+          <FieldError field="turnstile" message={errorOf("turnstile")} />
           <div aria-live="polite">
             <StatusMessage state={state} closesAt={closesAt} />
           </div>

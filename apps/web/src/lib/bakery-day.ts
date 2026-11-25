@@ -1,7 +1,7 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Today's date as YYYY-MM-DD on the bakery's clock; the Worker itself runs in UTC. */
-const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
+export const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",
@@ -15,12 +15,17 @@ const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
   return today;
 };
 
-export const tomorrowIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
-  const today = todayIn({ now, timeZone });
-  const tomorrow = new Date(Date.parse(`${today}T00:00:00Z`) + DAY_MS).toISOString().slice(0, 10);
+/** Calendar days on YYYY-MM-DD dates, computed in UTC so clock changes never shift them. */
+export const addDays = ({ day, days }: { day: string; days: number }) => {
+  const shifted = new Date(Date.parse(`${day}T00:00:00Z`) + days * DAY_MS)
+    .toISOString()
+    .slice(0, 10);
 
-  return tomorrow;
+  return shifted;
 };
+
+export const tomorrowIn = ({ now, timeZone }: { now: Date; timeZone: string }) =>
+  addDays({ day: todayIn({ now, timeZone }), days: 1 });
 
 const dayFormat = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
