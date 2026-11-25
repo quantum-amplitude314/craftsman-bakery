@@ -11,11 +11,13 @@ export const createApiTestContext = ({
   turnstilePasses = true,
   isStaff = false,
   now = "2026-12-23T12:00:00Z",
+  codes = ["K7M2"],
 }: {
   db: Db;
   turnstilePasses?: boolean;
   isStaff?: boolean;
   now?: string;
+  codes?: string[];
 }) => {
   const readStore = createDrizzleReadStore({ db });
   const context: ApiContext = {
@@ -24,7 +26,7 @@ export const createApiTestContext = ({
     freshReadStore: readStore,
     cutoff: { timeZone: "Europe/Prague", time: "18:00" },
     now: () => new Date(now),
-    generateCode: codesFrom(["K7M2"]),
+    generateCode: codesFrom(codes),
     verifyTurnstile: async () => turnstilePasses,
     isStaff: async () => isStaff,
   };

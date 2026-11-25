@@ -1,7 +1,9 @@
 import { and, asc, eq, sql } from "drizzle-orm";
+import { DrizzleQueryError } from "drizzle-orm/errors";
+import { DatabaseError } from "pg";
 import type { ReservationWriteStore, ReserveResult } from "../commands/ports.ts";
 import type { Db } from "../db/client.ts";
-import { capacity, reservation, reservationItem } from "../db/schema.ts";
+import { capacity, defaultCapacity, reservation, reservationItem } from "../db/schema.ts";
 
 class ReservationRejected extends Error {
   readonly result: Exclude<ReserveResult, "RESERVED">;
@@ -14,16 +16,11 @@ class ReservationRejected extends Error {
 
 const FOREIGN_KEY_VIOLATION = "23503";
 
-const isForeignKeyViolation = (error: unknown) => {
-  const cause = error instanceof Error ? error.cause : undefined;
-  const violation =
-    typeof cause === "object" &&
-    cause !== null &&
-    "code" in cause &&
-    cause.code === FOREIGN_KEY_VIOLATION;
-
-  return violation;
-};
+/** Drizzle wraps the driver's error; the `pg` error with the SQLSTATE code is its cause. */
+const isForeignKeyViolation = (error: unknown) =>
+  error instanceof DrizzleQueryError &&
+  error.cause instanceof DatabaseError &&
+  error.cause.code === FOREIGN_KEY_VIOLATION;
 
 export const createDrizzleWriteStore = ({ db }: { db: Db }) => {
   const store: ReservationWriteStore = {
@@ -41,6 +38,29 @@ export const createDrizzleWriteStore = ({ db }: { db: Db }) => {
             first.productId.localeCompare(second.productId),
           );
           for (const { productId, quantity } of itemsInLockOrder) {
+            // A day nobody set takes its default as its capacity row on the first reservation.
+            await tx
+              .insert(capacity)
+              .select(
+                tx
+                  .select({
+                    productId: defaultCapacity.productId,
+                    pickupDay: sql`${pickupDay}::date`.as("pickup_day"),
+                    capacity: defaultCapacity.capacity,
+                    reserved: sql`0`.as("reserved"),
+                  })
+                  .from(defaultCapacity)
+                  .where(
+                    and(
+                      eq(defaultCapacity.productId, productId),
+                      eq(
+                        defaultCapacity.weekday,
+                        sql`extract(isodow from ${pickupDay}::date)::int`,
+                      ),
+                    ),
+                  ),
+              )
+              .onConflictDoNothing();
             const counted = await tx
               .update(capacity)
               .set({ reserved: sql`${capacity.reserved} + ${quantity}` })

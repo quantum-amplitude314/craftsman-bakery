@@ -22,6 +22,27 @@
       "when": 1795611236637,
       "tag": "0002_daily_garia",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795616982809,
+      "tag": "0003_dusty_azazel",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795617093325,
+      "tag": "0004_fixed_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795617093602,
+      "tag": "0005_overconfident_zzzax",
+      "breakpoints": true
     }
   ]
 }

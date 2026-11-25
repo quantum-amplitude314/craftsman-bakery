@@ -38,6 +38,22 @@ export const capacity = pgTable(
   ],
 );
 
+/** What the bakery baked per product and day, from its own records. */
+export const bakeHistory = pgTable(
+  "bake_history",
+  {
+    productId: uuid()
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    day: date().notNull(),
+    baked: integer().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.productId, table.day] }),
+    check("bake_history_baked_non_negative", sql`${table.baked} >= 0`),
+  ],
+);
+
 export const reservation = pgTable("reservation", {
   code: text().primaryKey(),
   pickupDay: date().notNull(),
@@ -127,12 +143,23 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-/** What is left of each product offered on a pickup day. */
-export const availability = pgView("availability", {
+/** Share of a typical bake the bakery accepts as reservations. */
+const RESERVABLE_SHARE = 0.3;
+/** How many of the latest same weekdays make the typical bake. */
+const RECENT_WEEKDAYS = 4;
+
+/** Capacity for a day nobody set: a share of the recent average bake on that weekday (ISO, Monday 1). */
+export const defaultCapacity = pgView("default_capacity", {
   productId: uuid().notNull(),
-  name: text().notNull(),
-  pickupDay: date().notNull(),
-  available: integer().notNull(),
+  weekday: integer().notNull(),
+  capacity: integer().notNull(),
 }).as(
-  sql`select ${capacity.productId}, ${product.name}, ${capacity.pickupDay}, ${capacity.capacity} - ${capacity.reserved} as available from ${capacity} inner join ${product} on ${product.id} = ${capacity.productId}`,
+  sql`select product_id, weekday, round(avg(baked) * ${sql.raw(String(RESERVABLE_SHARE))})::int as capacity
+  from (
+    select ${bakeHistory.productId}, ${bakeHistory.baked}, extract(isodow from ${bakeHistory.day})::int as weekday,
+      row_number() over (partition by ${bakeHistory.productId}, extract(isodow from ${bakeHistory.day}) order by ${bakeHistory.day} desc) as recency
+    from ${bakeHistory}
+  ) recent
+  where recency <= ${sql.raw(String(RECENT_WEEKDAYS))}
+  group by product_id, weekday`,
 );

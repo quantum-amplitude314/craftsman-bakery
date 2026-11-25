@@ -1,23 +1,39 @@
 import type { PickupList } from "@acme-bakery/contracts";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import type { Db } from "../db/client.ts";
-import { availability, product, reservation, reservationItem } from "../db/schema.ts";
+import { capacity, defaultCapacity, product, reservation, reservationItem } from "../db/schema.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
 
 type PickupReservation = PickupList["reservations"][number];
 
 export const createDrizzleReadStore = ({ db }: { db: Db }) => {
   const store: ReservationReadStore = {
-    availableOn: ({ pickupDay }) =>
-      db
+    availableOn: ({ pickupDay }) => {
+      const effectiveCapacity = sql`coalesce(${capacity.capacity}, ${defaultCapacity.capacity})`;
+
+      return db
         .select({
-          productId: availability.productId,
-          name: availability.name,
-          available: availability.available,
+          productId: product.id,
+          name: product.name,
+          available: sql<number>`${effectiveCapacity} - coalesce(${capacity.reserved}, 0)`.mapWith(
+            Number,
+          ),
         })
-        .from(availability)
-        .where(eq(availability.pickupDay, pickupDay))
-        .orderBy(asc(availability.name)),
+        .from(product)
+        .leftJoin(
+          capacity,
+          and(eq(capacity.productId, product.id), eq(capacity.pickupDay, pickupDay)),
+        )
+        .leftJoin(
+          defaultCapacity,
+          and(
+            eq(defaultCapacity.productId, product.id),
+            eq(defaultCapacity.weekday, sql`extract(isodow from ${pickupDay}::date)::int`),
+          ),
+        )
+        .where(sql`${effectiveCapacity} is not null`)
+        .orderBy(asc(product.name));
+    },
     bakeCountOn: ({ pickupDay }) =>
       db
         .select({

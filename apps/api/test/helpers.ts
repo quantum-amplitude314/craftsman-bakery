@@ -1,7 +1,7 @@
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { createDb, type Db } from "../src/db/client.ts";
-import { account, capacity, product, user } from "../src/db/schema.ts";
+import { account, bakeHistory, capacity, product, user } from "../src/db/schema.ts";
 import { readTestDatabaseUrl } from "./test-database.ts";
 
 export const createTestDb = () => createDb({ connectionString: readTestDatabaseUrl() });
@@ -9,7 +9,7 @@ export const createTestDb = () => createDb({ connectionString: readTestDatabaseU
 // Drizzle queries are lazy thenables, not Promises: await them so bun:test hooks run them.
 export const resetTables = async ({ db }: { db: Db }) => {
   await db.execute(
-    sql`truncate reservation_item, reservation, capacity, product, verification, account, session, "user"`,
+    sql`truncate reservation_item, reservation, capacity, bake_history, product, verification, account, session, "user"`,
   );
 };
 
@@ -84,4 +84,16 @@ export const seedStaff = async ({
     providerId: "credential",
     password: await hashPassword(password),
   });
+};
+
+export const seedHistory = async ({
+  db,
+  productId,
+  records,
+}: {
+  db: Db;
+  productId: string;
+  records: { day: string; baked: number }[];
+}) => {
+  await db.insert(bakeHistory).values(records.map(({ day, baked }) => ({ productId, day, baked })));
 };
