@@ -9,8 +9,8 @@
     "db:migrate": "bun --env-file=.env.development drizzle-kit migrate",
     "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "test": "bun --env-file=.env.test test",
-    "preview": "wrangler dev --port 3848",
-    "typegen": "wrangler types --config wrangler.example.jsonc",
+    "preview": "wrangler dev --env-file .env.development --port 3848",
+    "typegen": "wrangler types",
     "demo:seed": "bun --env-file=.env.development scripts/demo-seed.ts"
   },
   "dependencies": {
