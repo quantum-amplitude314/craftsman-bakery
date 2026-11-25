@@ -67,12 +67,12 @@ beforeEach(() => resetTables({ db }));
 afterAll(() => close());
 
 describe("staff queries", () => {
-  test("the bake count sums the day's reservations per product", async () => {
-    const { bread, croissant } = await seedDay();
+  test("the capacity's reserved is the bake count: the day's reservations per product", async () => {
+    const { bread, croissant, baguette } = await seedDay();
 
     const { status, body } = await sendApi({
       method: "GET",
-      path: `/staff/bake-count?pickupDay=${pickupDay}`,
+      path: `/staff/capacity?pickupDay=${pickupDay}`,
       context: staff,
     });
 
@@ -80,8 +80,9 @@ describe("staff queries", () => {
     expect(body).toEqual({
       pickupDay,
       products: [
-        { productId: bread, name: "Bread", quantity: 3 },
-        { productId: croissant, name: "Croissant", quantity: 3 },
+        { productId: baguette, name: "Baguette", capacity: 20, reserved: 0 },
+        { productId: bread, name: "Bread", capacity: 20, reserved: 3 },
+        { productId: croissant, name: "Croissant", capacity: 20, reserved: 3 },
       ],
     });
   });
@@ -153,7 +154,7 @@ describe("staff queries", () => {
     const visitor = createApiTestContext({ db });
 
     const statuses = await Promise.all(
-      ["bake-count", "pickup-list", "capacity"].map(async (path) => {
+      ["pickup-list", "capacity"].map(async (path) => {
         const { status } = await sendApi({
           method: "GET",
           path: `/staff/${path}?pickupDay=${pickupDay}`,
@@ -164,6 +165,6 @@ describe("staff queries", () => {
       }),
     );
 
-    expect(statuses).toEqual([401, 401, 401]);
+    expect(statuses).toEqual([401, 401]);
   });
 });

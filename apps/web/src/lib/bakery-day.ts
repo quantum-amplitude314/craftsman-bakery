@@ -1,5 +1,3 @@
-import { addDays } from "@craftsman-bakery/contracts";
-
 /** Today's date as YYYY-MM-DD on the bakery's clock; the Worker itself runs in UTC. */
 export const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -15,9 +13,6 @@ export const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
   return today;
 };
 
-export const tomorrowIn = ({ now, timeZone }: { now: Date; timeZone: string }) =>
-  addDays({ day: todayIn({ now, timeZone }), days: 1 });
-
 const dayFormat = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
   weekday: "long",
@@ -25,8 +20,13 @@ const dayFormat = new Intl.DateTimeFormat("en-GB", {
   month: "long",
 });
 
+const weekdayFormat = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "long" });
+
 /** "Thursday 26 November" for a YYYY-MM-DD day. */
 export const formatDay = (day: string) => dayFormat.format(new Date(`${day}T00:00:00Z`));
+
+/** "Thursday" for a YYYY-MM-DD day. */
+export const formatWeekday = (day: string) => weekdayFormat.format(new Date(`${day}T00:00:00Z`));
 
 /** "Wednesday 25 November, 18:00" for a bakery wall-clock time such as "2026-11-25T18:00". */
 export const formatWallClock = (wallClock: string) => {

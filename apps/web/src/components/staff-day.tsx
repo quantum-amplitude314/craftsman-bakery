@@ -1,43 +1,52 @@
-import type { BakeCount, DayCapacity, PickupList } from "@craftsman-bakery/contracts";
+import { addDays, type DayCapacity, type PickupList } from "@craftsman-bakery/contracts";
 import { ORPCError } from "@orpc/client";
 import Link from "next/link";
 import { connection } from "next/server";
+import { BakeCountTable } from "@/components/bake-count-table";
 import { CancelReservationButton } from "@/components/cancel-reservation-button";
-import { CapacityRow } from "@/components/capacity-row";
 import { SessionExpired } from "@/components/session-expired";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/lib/api";
-import { formatDay, todayIn, tomorrowIn } from "@/lib/bakery-day";
+import { formatDay, formatWeekday, todayIn } from "@/lib/bakery-day";
 import { getEnv } from "@/lib/env";
 
-const DAY_CHOICES = [
-  { choice: "today", label: "Today" },
-  { choice: "tomorrow", label: "Tomorrow" },
-] as const;
+const DAY_CHOICES = ["today", "tomorrow", "day-after"] as const;
 
-type DayChoice = (typeof DAY_CHOICES)[number]["choice"];
+type DayChoice = (typeof DAY_CHOICES)[number];
+
+const DAYS_AHEAD: Record<DayChoice, number> = { today: 0, tomorrow: 1, "day-after": 2 };
 
 export type StaffDaySearchParams = Promise<{ day?: string | string[] }>;
 
-const dayChoiceOf = (day: unknown): DayChoice => (day === "today" ? "today" : "tomorrow");
+const dayChoiceOf = (day: unknown): DayChoice =>
+  DAY_CHOICES.find((choice) => choice === day) ?? "tomorrow";
 
-const pickupDayOf = async (choice: DayChoice) => {
+/** On the bakery's clock, never the viewer's. */
+const bakeryToday = async () => {
   await connection();
   const { BAKERY_TIME_ZONE: timeZone } = await getEnv();
-  const now = new Date();
-  const pickupDay = choice === "today" ? todayIn({ now, timeZone }) : tomorrowIn({ now, timeZone });
+  const today = todayIn({ now: new Date(), timeZone });
 
-  return pickupDay;
+  return today;
+};
+
+const pickupDayOf = ({ today, choice }: { today: string; choice: DayChoice }) =>
+  addDays({ day: today, days: DAYS_AHEAD[choice] });
+
+const labelOf = ({ today, choice }: { today: string; choice: DayChoice }) => {
+  if (choice === "today") return "Today";
+  if (choice === "tomorrow") return "Tomorrow";
+
+  return formatWeekday(pickupDayOf({ today, choice }));
 };
 
 const loadDay = async (pickupDay: string) => {
-  const [bakeCount, pickupList, dayCapacity] = await Promise.all([
-    apiClient.staff.bakeCount({ pickupDay }),
-    apiClient.staff.pickupList({ pickupDay }),
+  const [dayCapacity, pickupList] = await Promise.all([
     apiClient.staff.capacity({ pickupDay }),
+    apiClient.staff.pickupList({ pickupDay }),
   ]);
-  const day = { bakeCount, pickupList, dayCapacity };
+  const day = { dayCapacity, pickupList };
 
   return day;
 };
@@ -45,10 +54,10 @@ const loadDay = async (pickupDay: string) => {
 const isUnauthorized = (error: unknown) =>
   error instanceof ORPCError && error.code === "UNAUTHORIZED";
 
-function DaySwitch({ current }: { current: DayChoice }) {
+function DaySwitch({ today, current }: { today: string; current: DayChoice }) {
   return (
     <nav aria-label="Day" className="flex gap-2">
-      {DAY_CHOICES.map(({ choice, label }) => (
+      {DAY_CHOICES.map((choice) => (
         <Button
           key={choice}
           variant={choice === current ? "default" : "outline"}
@@ -60,54 +69,25 @@ function DaySwitch({ current }: { current: DayChoice }) {
             />
           }
         >
-          {label}
+          {labelOf({ today, choice })}
         </Button>
       ))}
     </nav>
   );
 }
 
-function BakeCountCard({ products }: { products: BakeCount["products"] }) {
+function BakeCountCard(dayCapacity: DayCapacity) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Bake count</CardTitle>
-        <CardDescription>Reserved for pickup this day.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {products.length === 0 ? (
-          <p className="text-muted-foreground">Nothing reserved.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {products.map(({ productId, name, quantity }) => (
-              <li key={productId} className="flex justify-between gap-4 py-2">
-                <span>{name}</span>
-                <span className="font-medium tabular-nums">{quantity}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function CapacityCard({ pickupDay, products }: DayCapacity) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Capacity</CardTitle>
         <CardDescription>
-          How many customers can reserve: the weekday default until you change it, – when not
-          offered.
+          Reserved is what to bake for pickup this day. Capacity is how many customers can reserve:
+          the weekday default until you change it, – when not offered.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="divide-y divide-border">
-          {products.map((product) => (
-            <CapacityRow key={product.productId} pickupDay={pickupDay} product={product} />
-          ))}
-        </div>
+        <BakeCountTable key={dayCapacity.pickupDay} {...dayCapacity} />
       </CardContent>
     </Card>
   );
@@ -161,25 +141,23 @@ export function StaffDaySkeleton() {
 export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchParams }) {
   const { day } = await searchParams;
   const choice = dayChoiceOf(day);
-  const pickupDay = await pickupDayOf(choice);
+  const today = await bakeryToday();
+  const pickupDay = pickupDayOf({ today, choice });
   const loaded = await loadDay(pickupDay).catch((error: unknown) => {
     if (isUnauthorized(error)) return null;
     throw error;
   });
   if (!loaded) return <SessionExpired />;
-  const { bakeCount, pickupList, dayCapacity } = loaded;
+  const { dayCapacity, pickupList } = loaded;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="font-heading font-semibold text-2xl">{formatDay(pickupDay)}</h2>
-        <DaySwitch current={choice} />
+        <DaySwitch today={today} current={choice} />
       </div>
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-        <div className="space-y-6">
-          <BakeCountCard products={bakeCount.products} />
-          <CapacityCard {...dayCapacity} />
-        </div>
+        <BakeCountCard {...dayCapacity} />
         <PickupListCard reservations={pickupList.reservations} />
       </div>
     </div>

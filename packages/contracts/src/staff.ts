@@ -1,36 +1,17 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
+import { capacityBelowReserved, notFound, unauthorized } from "./errors.ts";
 import {
-  capacityBelowReserved,
-  capacityExceeded,
-  notFound,
-  reservationsClosed,
-  unauthorized,
-} from "./errors.ts";
-import {
-  bakeCountSchema,
   capacityInputSchema,
   codeSchema,
   dayCapacitySchema,
   pickupDaySchema,
   pickupListSchema,
-  reservationInputSchema,
-  reservationReceiptSchema,
 } from "./schemas.ts";
 
 const pickupDayInputSchema = z.object({ pickupDay: pickupDaySchema });
 
 export const staffContract = {
-  reserve: oc
-    .route({
-      method: "POST",
-      path: "/staff/reservations",
-      successStatus: 201,
-      summary: "Enter a phone reservation, all or nothing",
-    })
-    .input(reservationInputSchema)
-    .output(reservationReceiptSchema)
-    .errors({ ...capacityExceeded, ...reservationsClosed, ...unauthorized }),
   cancel: oc
     .route({
       method: "POST",
@@ -57,15 +38,6 @@ export const staffContract = {
     })
     .input(pickupDayInputSchema)
     .output(dayCapacitySchema)
-    .errors(unauthorized),
-  bakeCount: oc
-    .route({
-      method: "GET",
-      path: "/staff/bake-count",
-      summary: "Reserved quantities per product for a pickup day",
-    })
-    .input(pickupDayInputSchema)
-    .output(bakeCountSchema)
     .errors(unauthorized),
   pickupList: oc
     .route({

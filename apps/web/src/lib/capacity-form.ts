@@ -4,40 +4,59 @@ import { z } from "zod";
 
 export const CAPACITY_MAX = 9999;
 
+const CAPACITY_FIELD_PREFIX = "capacity:";
+
+export const capacityFieldOf = (productId: string) => `${CAPACITY_FIELD_PREFIX}${productId}`;
+
 export type CapacityState =
   | { status: "editing" }
-  | { status: "invalid" }
   | { status: "saved" }
-  | { status: "below-reserved" }
-  | { status: "not-found" }
+  | { status: "invalid"; productIds: string[] }
+  | { status: "below-reserved"; productIds: string[] }
   | { status: "signed-out" }
   | { status: "failed" };
 
-const formSchema = capacityInputSchema.extend({
+const changeSchema = capacityInputSchema.extend({
   capacity: z.string().trim().regex(/^\d+$/).transform(Number).pipe(z.int().max(CAPACITY_MAX)),
 });
 
-export const readCapacityForm = (formData: FormData) => {
-  const parsed = formSchema.safeParse({
-    pickupDay: formData.get("pickupDay"),
-    productId: formData.get("productId"),
-    capacity: formData.get("capacity") ?? "",
-  });
-  if (!parsed.success) return { status: "invalid" as const };
+/** The form carries only the capacities that differ from the current ones. */
+export const readCapacityChanges = (formData: FormData) => {
+  const pickupDay = formData.get("pickupDay");
+  const parsedChanges = [...formData.entries()]
+    .filter(([field]) => field.startsWith(CAPACITY_FIELD_PREFIX))
+    .map(([field, capacity]) => {
+      const productId = field.slice(CAPACITY_FIELD_PREFIX.length);
+      const parsed = changeSchema.safeParse({ pickupDay, productId, capacity });
 
-  const valid = { status: "valid" as const, input: parsed.data };
+      return { productId, parsed };
+    });
+  const invalidProductIds = parsedChanges
+    .filter(({ parsed }) => !parsed.success)
+    .map(({ productId }) => productId);
+  if (invalidProductIds.length > 0)
+    return { status: "invalid" as const, productIds: invalidProductIds };
+
+  const valid = {
+    status: "valid" as const,
+    changes: parsedChanges.flatMap(({ parsed }) => (parsed.success ? [parsed.data] : [])),
+  };
 
   return valid;
 };
 
-const FAILURES_BY_CODE: Record<string, CapacityState> = {
-  CAPACITY_BELOW_RESERVED: { status: "below-reserved" },
-  NOT_FOUND: { status: "not-found" },
-  UNAUTHORIZED: { status: "signed-out" },
-};
+const errorCodeOf = (error: unknown) => (error instanceof ORPCError ? error.code : "FAILED");
 
-export const capacityFailureOf = (error: unknown): CapacityState => {
-  const failure = error instanceof ORPCError ? FAILURES_BY_CODE[error.code] : undefined;
+export const capacitySaveOutcomeOf = (
+  results: { productId: string; error?: unknown }[],
+): CapacityState => {
+  const failures = results.flatMap(({ productId, error }) =>
+    error === undefined ? [] : [{ productId, code: errorCodeOf(error) }],
+  );
+  if (failures.some(({ code }) => code === "UNAUTHORIZED")) return { status: "signed-out" };
+  if (failures.some(({ code }) => code !== "CAPACITY_BELOW_RESERVED")) return { status: "failed" };
+  if (failures.length > 0)
+    return { status: "below-reserved", productIds: failures.map(({ productId }) => productId) };
 
-  return failure ?? { status: "failed" };
+  return { status: "saved" };
 };

@@ -6,7 +6,6 @@ import type { ReservationWriteStore } from "../commands/ports.ts";
 import { reserveItems } from "../commands/reserve-items.ts";
 import { setCapacity } from "../commands/set-capacity.ts";
 import { getAvailability } from "../queries/availability.ts";
-import { getBakeCount } from "../queries/bake-count.ts";
 import { getDayCapacity } from "../queries/day-capacity.ts";
 import { getPickupList } from "../queries/pickup-list.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
@@ -32,10 +31,8 @@ const implementedContract = {
     cancel: contract.customer.cancel,
   },
   staff: {
-    reserve: contract.staff.reserve,
     cancel: contract.staff.cancel,
     capacity: contract.staff.capacity,
-    bakeCount: contract.staff.bakeCount,
     pickupList: contract.staff.pickupList,
     setCapacity: contract.staff.setCapacity,
   },
@@ -48,7 +45,6 @@ type ReserveErrors = {
   RESERVATIONS_CLOSED: () => Error;
 };
 
-/** Customers and staff reserve alike once Turnstile or the session has passed. */
 const reserveOrThrow = async ({
   context,
   reservation,
@@ -119,11 +115,6 @@ const router = api.router({
     }),
   },
   staff: {
-    reserve: api.staff.reserve.handler(async ({ input: reservation, context, errors }) => {
-      if (!(await context.isStaff())) throw errors.UNAUTHORIZED();
-
-      return reserveOrThrow({ context, reservation, errors });
-    }),
     cancel: api.staff.cancel.handler(async ({ input: { code }, context, errors }) => {
       const { writeStore, cutoff, now, isStaff } = context;
       if (!(await isStaff())) throw errors.UNAUTHORIZED();
@@ -150,12 +141,6 @@ const router = api.router({
       if (!(await isStaff())) throw errors.UNAUTHORIZED();
 
       return getDayCapacity({ store: freshReadStore, pickupDay });
-    }),
-    bakeCount: api.staff.bakeCount.handler(async ({ input: { pickupDay }, context, errors }) => {
-      const { isStaff, freshReadStore } = context;
-      if (!(await isStaff())) throw errors.UNAUTHORIZED();
-
-      return getBakeCount({ store: freshReadStore, pickupDay });
     }),
     pickupList: api.staff.pickupList.handler(async ({ input: { pickupDay }, context, errors }) => {
       const { isStaff, freshReadStore } = context;

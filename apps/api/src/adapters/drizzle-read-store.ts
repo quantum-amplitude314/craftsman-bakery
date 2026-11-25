@@ -47,19 +47,6 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
         .leftJoin(capacity, capacityOnDay(pickupDay))
         .leftJoin(defaultCapacity, defaultOnWeekdayOf(pickupDay))
         .orderBy(asc(product.name)),
-    bakeCountOn: ({ pickupDay }) =>
-      db
-        .select({
-          productId: product.id,
-          name: product.name,
-          quantity: sql<number>`sum(${reservationItem.quantity})`.mapWith(Number),
-        })
-        .from(reservationItem)
-        .innerJoin(reservation, eq(reservation.code, reservationItem.reservationCode))
-        .innerJoin(product, eq(product.id, reservationItem.productId))
-        .where(eq(reservation.pickupDay, pickupDay))
-        .groupBy(product.id, product.name)
-        .orderBy(asc(product.name)),
     pickupListOn: async ({ pickupDay }) => {
       const rows = await db
         .select({

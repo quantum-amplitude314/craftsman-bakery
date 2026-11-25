@@ -8,14 +8,21 @@ const beforeCutoff = "2026-12-23T12:00:00Z";
 const afterCutoff = "2026-12-23T17:00:00Z";
 
 const staff = ({ now = beforeCutoff }: { now?: string } = {}) =>
-  createApiTestContext({ db, isStaff: true, turnstilePasses: false, now });
+  createApiTestContext({ db, isStaff: true, now });
 
-const phoneReservation = ({ productId }: { productId: string }) => ({
-  pickupDay,
-  name: "Bob",
-  phone: "+420 602 000 111",
-  items: [{ productId, quantity: 2 }],
-});
+const reserveBread = ({ productId }: { productId: string }) =>
+  sendApi({
+    method: "POST",
+    path: "/reservations",
+    body: {
+      pickupDay,
+      name: "Bob",
+      phone: "+420 602 000 111",
+      items: [{ productId, quantity: 2 }],
+      turnstileToken: "token",
+    },
+    context: createApiTestContext({ db, now: beforeCutoff }),
+  });
 
 const seedBread = async () => {
   const bread = await seedProduct({ db, name: "Bread" });
@@ -28,61 +35,23 @@ beforeEach(() => resetTables({ db }));
 afterAll(() => close());
 
 describe("staff API", () => {
-  test("staff routes answer 401 without a staff session", async () => {
+  test("staff cancel answers 401 without a staff session", async () => {
     const bread = await seedBread();
-    const visitor = createApiTestContext({ db });
-
-    const reserve = await sendApi({
-      method: "POST",
-      path: "/staff/reservations",
-      body: phoneReservation({ productId: bread }),
-      context: visitor,
-    });
-    const cancel = await sendApi({
-      method: "POST",
-      path: "/staff/reservations/K7M2/cancel",
-      context: visitor,
-    });
-
-    expect([reserve.status, cancel.status]).toEqual([401, 401]);
-    expect(await reservedOf({ db, productId: bread, pickupDay })).toBe(0);
-  });
-
-  test("staff enter a phone reservation, no Turnstile", async () => {
-    const bread = await seedBread();
-
-    const { status, body } = await sendApi({
-      method: "POST",
-      path: "/staff/reservations",
-      body: phoneReservation({ productId: bread }),
-      context: staff(),
-    });
-
-    expect(status).toBe(201);
-    expect(body).toEqual({ code: "K7M2", pickupDay });
-  });
-
-  test("phone reservations close at the cutoff too", async () => {
-    const bread = await seedBread();
+    await reserveBread({ productId: bread });
 
     const { status } = await sendApi({
       method: "POST",
-      path: "/staff/reservations",
-      body: phoneReservation({ productId: bread }),
-      context: staff({ now: afterCutoff }),
+      path: "/staff/reservations/K7M2/cancel",
+      context: createApiTestContext({ db }),
     });
 
-    expect(status).toBe(422);
+    expect(status).toBe(401);
+    expect(await reservedOf({ db, productId: bread, pickupDay })).toBe(2);
   });
 
   test("staff cancel after the cutoff and the capacity is free again", async () => {
     const bread = await seedBread();
-    await sendApi({
-      method: "POST",
-      path: "/staff/reservations",
-      body: phoneReservation({ productId: bread }),
-      context: staff(),
-    });
+    await reserveBread({ productId: bread });
 
     const { status } = await sendApi({
       method: "POST",

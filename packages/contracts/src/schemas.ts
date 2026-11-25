@@ -62,12 +62,6 @@ const productQuantitySchema = z.object({
   quantity: z.int().positive(),
 });
 
-export const bakeCountSchema = z.object({
-  pickupDay: pickupDaySchema,
-  products: z.array(productQuantitySchema),
-});
-export type BakeCount = z.infer<typeof bakeCountSchema>;
-
 export const pickupListSchema = z.object({
   pickupDay: pickupDaySchema,
   reservations: z.array(
