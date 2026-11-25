@@ -1,7 +1,7 @@
 name: acme-bakery
 services:
   postgres-dev:
-    image: docker.io/library/postgres:18-alpine
+    image: docker.io/library/postgres:19-alpine
     container_name: acme-bakery-pg-dev
     environment:
       POSTGRES_USER: postgres
@@ -17,7 +17,7 @@ services:
     volumes:
       - pgdata-dev:/var/lib/postgresql
   postgres-test:
-    image: docker.io/library/postgres:18-alpine
+    image: docker.io/library/postgres:19-alpine
     container_name: acme-bakery-pg-test
     environment:
       POSTGRES_USER: postgres

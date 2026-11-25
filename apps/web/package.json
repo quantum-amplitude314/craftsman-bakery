@@ -1,0 +1,39 @@
+{
+  "name": "@acme-bakery/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.4",
+  "scripts": {
+    "dev": "bun --bun next dev --port 3847",
+    "build": "bun --bun next build",
+    "build:worker": "bun --bun run opennextjs-cloudflare build",
+    "preview": "bun run build:worker --env preview && opennextjs-cloudflare preview --env preview --port 3847",
+    "typegen": "wrangler types --env-interface CloudflareEnv --strict-vars=false cloudflare-env.d.ts && next typegen",
+    "typecheck": "tsc --noEmit",
+    "deploy": "bun run build:worker && opennextjs-cloudflare deploy"
+  },
+  "dependencies": {
+    "@acme-bakery/contracts": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/contract": "catalog:",
+    "@orpc/openapi-client": "catalog:",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "^0.0.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.18",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "trustedDependencies": []
+}

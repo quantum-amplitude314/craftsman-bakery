@@ -12,9 +12,9 @@
   "markdown": { "formatter": { "enabled": false }, "linter": { "enabled": false } },
   "javascript": {
     "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
-  }
+  },
   // Tailwind:
-  // "css": { "parser": { "tailwindDirectives": true } },
+  "css": { "parser": { "tailwindDirectives": true } }
   // shadcn (the CLI overwrites these files; adjust the path to the project layout):
   // "overrides": [{ "includes": ["components/ui/**"], "linter": { "enabled": false } }]
 }

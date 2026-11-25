@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "acme-bakery-web",
+  "main": "worker.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [{ "pattern": "acme-bakery.example.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": { "WRANGLER_BINDING": "on", "BAKERY_TIME_ZONE": "Europe/Prague" },
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [
+    { "binding": "API", "service": "acme-bakery-api" },
+    { "binding": "WORKER_SELF_REFERENCE", "service": "acme-bakery-web" }
+  ],
+  "env": {
+    // Local workerd (OpenNext preview); a named environment suffixes Worker names with `-preview`.
+    "preview": {
+      "routes": [],
+      "vars": { "WRANGLER_BINDING": "on", "BAKERY_TIME_ZONE": "Europe/Prague" },
+      "services": [
+        { "binding": "API", "service": "acme-bakery-api-preview" },
+        { "binding": "WORKER_SELF_REFERENCE", "service": "acme-bakery-web-preview" }
+      ]
+    }
+  },
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true },
+    "issues": { "enabled": true }
+  }
+}

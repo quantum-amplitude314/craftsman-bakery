@@ -7,10 +7,13 @@
   "scripts": {
     "db:generate": "bun --env-file=.env.development drizzle-kit generate",
     "db:migrate": "bun --env-file=.env.development drizzle-kit migrate",
+    "db:migrate:preview": "bun --env-file=.env.preview.db drizzle-kit migrate",
+    "db:migrate:production": "bun --env-file=.env.production.db drizzle-kit migrate",
     "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "test": "bun --env-file=.env.test test",
-    "preview": "wrangler dev --env-file .env.development --port 3848",
-    "typegen": "wrangler types"
+    "preview": "wrangler dev --env preview --env-file .env.development --port 3848",
+    "typegen": "wrangler types",
+    "deploy": "wrangler deploy --env=\"\""
   },
   "dependencies": {
     "@acme-bakery/contracts": "workspace:*",
@@ -27,7 +30,7 @@
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
     "typescript": "catalog:",
-    "wrangler": "^4.168.0"
+    "wrangler": "catalog:"
   },
   "trustedDependencies": []
 }

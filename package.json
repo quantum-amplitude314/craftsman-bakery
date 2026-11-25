@@ -15,7 +15,10 @@
       "zod": "^4.6.7",
       "@orpc/openapi": "^1.16.5",
       "@orpc/server": "^1.16.5",
-      "better-auth": "^1.7.28"
+      "better-auth": "^1.7.28",
+      "@orpc/client": "^1.16.5",
+      "@orpc/openapi-client": "^1.16.5",
+      "wrangler": "^4.168.0"
     }
   },
   "scripts": {
@@ -28,7 +31,11 @@
     "db:down": "podman compose down",
     "db:generate": "bun run --cwd apps/api db:generate",
     "db:migrate": "bun run --cwd apps/api db:migrate",
-    "demo:seed": "bun run --cwd packages/maintain demo:seed"
+    "db:migrate:preview": "bun run --cwd apps/api db:migrate:preview",
+    "db:migrate:production": "bun run --cwd apps/api db:migrate:production",
+    "demo:seed": "bun run --cwd packages/maintain demo:seed",
+    "demo:seed:preview": "bun run --cwd packages/maintain demo:seed:preview",
+    "demo:seed:production": "bun run --cwd packages/maintain demo:seed:production"
   },
   "devDependencies": {
     "@socketsecurity/bun-security-scanner": "^1.1.3",
