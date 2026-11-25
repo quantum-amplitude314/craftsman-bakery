@@ -1,7 +1,9 @@
 import { defineConfig } from "drizzle-kit";
-import { readDatabaseEnv } from "./src/env.ts";
+import { z } from "zod";
 
-const { DATABASE_URL: databaseUrl } = readDatabaseEnv();
+const { DATABASE_URL: databaseUrl } = z
+  .object({ DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }) })
+  .parse(process.env);
 
 export default defineConfig({
   dialect: "postgresql",

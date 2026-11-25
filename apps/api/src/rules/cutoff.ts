@@ -9,7 +9,7 @@ const dayBefore = (day: string) => {
 };
 
 /** "2026-07-14 17:59" on the given zone's clock. */
-const wallClock = ({ instant, timeZone }: { instant: Date; timeZone: string }) => {
+export const wallClock = ({ instant, timeZone }: { instant: Date; timeZone: string }) => {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",

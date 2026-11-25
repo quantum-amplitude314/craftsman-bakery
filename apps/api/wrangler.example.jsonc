@@ -1,0 +1,25 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "acme-bakery-api",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "BAKERY_TIME_ZONE": "Europe/Prague",
+    "CUTOFF_TIME": "18:00"
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE_COMMANDS",
+      "id": "<hyperdrive id, caching off>",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/acme_bakery"
+    },
+    {
+      "binding": "HYPERDRIVE_QUERIES",
+      "id": "<hyperdrive id, caching on>",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/acme_bakery"
+    }
+  ]
+}
