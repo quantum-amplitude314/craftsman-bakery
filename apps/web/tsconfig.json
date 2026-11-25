@@ -4,9 +4,15 @@
     "lib": ["dom", "dom.iterable", "ES2023"],
     "types": ["node", "react", "react-dom", "./cloudflare-env.d.ts"],
     "jsx": "react-jsx",
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", ".open-next"]
+  "exclude": ["node_modules", ".open-next", "test"]
 }

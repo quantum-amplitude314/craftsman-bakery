@@ -5,13 +5,14 @@
   "type": "module",
   "packageManager": "bun@1.4.4",
   "scripts": {
+    "dev": "wrangler dev --env development --env-file .env.development --port 3848",
     "db:generate": "bun --env-file=.env.development drizzle-kit generate",
     "db:migrate": "bun --env-file=.env.development drizzle-kit migrate",
     "db:migrate:preview": "bun --env-file=.env.preview.db drizzle-kit migrate",
     "db:migrate:production": "bun --env-file=.env.production.db drizzle-kit migrate",
     "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "test": "bun --env-file=.env.test test",
-    "preview": "wrangler dev --env preview --env-file .env.development --port 3848",
+    "preview": "wrangler dev --env preview --env-file .env.preview --port 3848",
     "typegen": "wrangler types",
     "deploy": "wrangler deploy --env=\"\""
   },

@@ -19,8 +19,8 @@
     { "binding": "HYPERDRIVE_QUERIES", "id": "<hyperdrive id, caching on>" }
   ],
   "env": {
-    // Local workerd (`wrangler dev --env preview`) against the local development database.
-    "preview": {
+    // `dev`: workerd against the local development database.
+    "development": {
       "vars": {
         "BAKERY_TIME_ZONE": "Europe/Prague",
         "CUTOFF_TIME": "18:00",
@@ -37,6 +37,27 @@
           "binding": "HYPERDRIVE_QUERIES",
           "id": "<hyperdrive id, caching on>",
           "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5435/acme_bakery"
+        }
+      ]
+    },
+    // `preview`: workerd against the Neon preview branch, direct connection string.
+    "preview": {
+      "vars": {
+        "BAKERY_TIME_ZONE": "Europe/Prague",
+        "CUTOFF_TIME": "18:00",
+        "WEB_ORIGIN": "http://localhost:3847"
+      },
+      "secrets": { "required": ["BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY"] },
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE_COMMANDS",
+          "id": "<hyperdrive id, caching off>",
+          "localConnectionString": "postgres://user:password@neon-preview-branch-host/neondb?sslmode=require"
+        },
+        {
+          "binding": "HYPERDRIVE_QUERIES",
+          "id": "<hyperdrive id, caching on>",
+          "localConnectionString": "postgres://user:password@neon-preview-branch-host/neondb?sslmode=require"
         }
       ]
     }
