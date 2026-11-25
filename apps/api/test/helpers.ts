@@ -1,6 +1,7 @@
+import { hashPassword } from "better-auth/crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { createDb, type Db } from "../src/db/client.ts";
-import { capacity, product } from "../src/db/schema.ts";
+import { account, capacity, product, user } from "../src/db/schema.ts";
 import { readTestDatabaseUrl } from "./test-database.ts";
 
 export const createTestDb = () => createDb({ connectionString: readTestDatabaseUrl() });
@@ -62,4 +63,25 @@ export const codesFrom = (codes: string[]) => {
   };
 
   return nextCode;
+};
+
+/** A staff account as the demo seed writes it: a user and its credential account. */
+export const seedStaff = async ({
+  db,
+  email,
+  password,
+}: {
+  db: Db;
+  email: string;
+  password: string;
+}) => {
+  const id = "test-staff";
+  await db.insert(user).values({ id, name: "Test Staff", email, emailVerified: true });
+  await db.insert(account).values({
+    id: `${id}-credential`,
+    userId: id,
+    accountId: id,
+    providerId: "credential",
+    password: await hashPassword(password),
+  });
 };

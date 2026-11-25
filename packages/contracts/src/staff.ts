@@ -1,6 +1,12 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import { capacityExceeded, notFound, reservationsClosed, unauthorized } from "./errors.ts";
+import {
+  capacityBelowReserved,
+  capacityExceeded,
+  notFound,
+  reservationsClosed,
+  unauthorized,
+} from "./errors.ts";
 import {
   bakeCountSchema,
   capacityInputSchema,
@@ -37,10 +43,11 @@ export const staffContract = {
     .route({
       method: "PUT",
       path: "/staff/capacity/{pickupDay}/{productId}",
+      successStatus: 204,
       summary: "Set how many of a product can be reserved for a pickup day",
     })
     .input(capacityInputSchema)
-    .errors({ ...notFound, ...unauthorized }),
+    .errors({ ...capacityBelowReserved, ...notFound, ...unauthorized }),
   bakeCount: oc
     .route({
       method: "GET",

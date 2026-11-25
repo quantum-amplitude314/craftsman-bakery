@@ -12,6 +12,19 @@ class ReservationRejected extends Error {
   }
 }
 
+const FOREIGN_KEY_VIOLATION = "23503";
+
+const isForeignKeyViolation = (error: unknown) => {
+  const cause = error instanceof Error ? error.cause : undefined;
+  const violation =
+    typeof cause === "object" &&
+    cause !== null &&
+    "code" in cause &&
+    cause.code === FOREIGN_KEY_VIOLATION;
+
+  return violation;
+};
+
 export const createDrizzleWriteStore = ({ db }: { db: Db }) => {
   const store: ReservationWriteStore = {
     reserveWithinCapacity: async ({ code, pickupDay, name, phone, items }) => {
@@ -89,6 +102,24 @@ export const createDrizzleWriteStore = ({ db }: { db: Db }) => {
 
         return true;
       }),
+    setCapacity: async ({ productId, pickupDay, capacity: limit }) => {
+      try {
+        const written = await db
+          .insert(capacity)
+          .values({ productId, pickupDay, capacity: limit })
+          .onConflictDoUpdate({
+            target: [capacity.productId, capacity.pickupDay],
+            set: { capacity: limit },
+            setWhere: sql`${capacity.reserved} <= ${limit}`,
+          })
+          .returning({ productId: capacity.productId });
+
+        return written.length === 0 ? "BELOW_RESERVED" : "SET";
+      } catch (error) {
+        if (isForeignKeyViolation(error)) return "UNKNOWN_PRODUCT";
+        throw error;
+      }
+    },
   };
 
   return store;

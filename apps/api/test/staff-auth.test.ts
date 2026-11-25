@@ -1,11 +1,10 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
 import { createAuth } from "../src/auth/auth.ts";
-import { createStaff } from "../src/auth/create-staff.ts";
-import { DEMO_STAFF } from "../src/auth/demo-staff.ts";
-import { createTestDb, resetTables } from "./helpers.ts";
+import { createTestDb, resetTables, seedStaff } from "./helpers.ts";
 
 const { db, close } = createTestDb();
 const origin = "http://bakery.test";
+const STAFF = { email: "staff@bakery.test", password: "staff-password" };
 const auth = createAuth({
   db,
   secret: "test-secret-at-least-32-characters-long",
@@ -24,13 +23,13 @@ const postAuth = ({ path, body }: { path: string; body: unknown }) =>
 
 beforeEach(async () => {
   await resetTables({ db });
-  await createStaff({ db, ...DEMO_STAFF });
+  await seedStaff({ db, ...STAFF });
 });
 afterAll(() => close());
 
 describe("staff sign-in", () => {
-  test("the demo staff account signs in and gets a session", async () => {
-    const { email, password } = DEMO_STAFF;
+  test("a staff account signs in and gets a session", async () => {
+    const { email, password } = STAFF;
 
     const response = await postAuth({ path: "/sign-in/email", body: { email, password } });
     const [sessionCookie = ""] = (response.headers.get("set-cookie") ?? "").split(";");
@@ -41,7 +40,7 @@ describe("staff sign-in", () => {
   });
 
   test("a wrong password is refused", async () => {
-    const { email } = DEMO_STAFF;
+    const { email } = STAFF;
 
     const response = await postAuth({
       path: "/sign-in/email",

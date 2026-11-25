@@ -23,12 +23,12 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "lint-fix": "biome check --write .",
+    "lint-fix": "biome check --write . && biome check --write --vcs-use-ignore-file=false --no-errors-on-unmatched packages/maintain",
     "db:up": "podman compose up -d --wait",
     "db:down": "podman compose down",
     "db:generate": "bun run --cwd apps/api db:generate",
     "db:migrate": "bun run --cwd apps/api db:migrate",
-    "demo:seed": "bun run --cwd apps/api demo:seed"
+    "demo:seed": "bun run --cwd packages/maintain demo:seed"
   },
   "devDependencies": {
     "@socketsecurity/bun-security-scanner": "^1.1.3",

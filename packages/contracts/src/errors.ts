@@ -13,5 +13,11 @@ export const reservationsClosed = {
 export const turnstileFailed = {
   TURNSTILE_FAILED: { status: 403, message: "The Turnstile check failed" },
 };
+export const capacityBelowReserved = {
+  CAPACITY_BELOW_RESERVED: {
+    status: 409,
+    message: "Capacity cannot go below what is already reserved",
+  },
+};
 export const notFound = { NOT_FOUND: { message: "Not found" } };
 export const unauthorized = { UNAUTHORIZED: { message: "Staff sign-in required" } };

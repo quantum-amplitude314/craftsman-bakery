@@ -1,5 +1,6 @@
-# private: nested repo
+# private: nested repos
 docs/
+packages/maintain/
 .ignore
 
 # agent files

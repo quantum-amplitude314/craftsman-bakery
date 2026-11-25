@@ -5,19 +5,17 @@ import { account, session, user, verification } from "../db/schema.ts";
 
 const SESSION_DAYS = 7;
 
-/** Staff only: accounts are seeded, so sign-up stays closed unless a seed opens it. */
+/** Staff only: accounts are seeded, so sign-up is closed. */
 export const createAuth = ({
   db,
   secret,
   baseURL,
   trustedOrigins,
-  signUp = "closed",
 }: {
   db: Db;
   secret: string;
   baseURL: string;
   trustedOrigins: string[];
-  signUp?: "open" | "closed";
 }) => {
   const auth = betterAuth({
     appName: "ACME Bakery",
@@ -30,7 +28,7 @@ export const createAuth = ({
       schema: { user, session, account, verification },
       transaction: true,
     }),
-    emailAndPassword: { enabled: true, disableSignUp: signUp === "closed", autoSignIn: false },
+    emailAndPassword: { enabled: true, disableSignUp: true },
     session: { expiresIn: 60 * 60 * 24 * SESSION_DAYS },
   });
 

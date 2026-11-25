@@ -4,6 +4,7 @@ import { implement } from "@orpc/server";
 import { cancelReservation } from "../commands/cancel-reservation.ts";
 import type { ReservationWriteStore } from "../commands/ports.ts";
 import { reserveItems } from "../commands/reserve-items.ts";
+import { setCapacity } from "../commands/set-capacity.ts";
 import { getAvailability } from "../queries/availability.ts";
 import { getBakeCount } from "../queries/bake-count.ts";
 import { getPickupList } from "../queries/pickup-list.ts";
@@ -34,6 +35,7 @@ const implementedContract = {
     cancel: contract.staff.cancel,
     bakeCount: contract.staff.bakeCount,
     pickupList: contract.staff.pickupList,
+    setCapacity: contract.staff.setCapacity,
   },
 };
 
@@ -150,6 +152,21 @@ const router = api.router({
       if (!(await isStaff())) throw errors.UNAUTHORIZED();
 
       return getPickupList({ store: freshReadStore, pickupDay });
+    }),
+    setCapacity: api.staff.setCapacity.handler(async ({ input, context, errors }) => {
+      const { isStaff, writeStore } = context;
+      if (!(await isStaff())) throw errors.UNAUTHORIZED();
+
+      const outcome = await setCapacity({ store: writeStore, capacity: input });
+      if (outcome.ok) return;
+      switch (outcome.failure) {
+        case "CAPACITY_BELOW_RESERVED":
+          throw errors.CAPACITY_BELOW_RESERVED();
+        case "NOT_FOUND":
+          throw errors.NOT_FOUND();
+        default:
+          throw outcome satisfies never;
+      }
     }),
   },
 });
