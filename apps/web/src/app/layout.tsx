@@ -1,25 +1,52 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { Inter } from "next/font/google";
+import { SiteHeader } from "@/components/site-header";
+import { getEnv } from "@/lib/env";
+import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "ACME Bakery",
-  description: "Reserve bread and pastry for pickup.",
-  icons: { icon: "/icon.svg" },
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
+const TITLE = "ACME Bakery";
+const DESCRIPTION = "Reserve bread and pastry for pickup.";
+/** Written by packages/maintain/brand/build.sh; X falls back to it. */
+const SHARE_IMAGE = { url: "/og-image-v1.jpg", type: "image/jpeg", width: 1200, height: 630 };
+
+export const generateMetadata = async (): Promise<Metadata> => {
+  const { WEB_ORIGIN: webOrigin } = await getEnv();
+  // The icons and the share image are files in public/, served without running the Worker.
+  const metadata: Metadata = {
+    metadataBase: new URL(webOrigin),
+    title: TITLE,
+    description: DESCRIPTION,
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
+      ],
+      apple: { url: "/apple-icon.png", type: "image/png", sizes: "180x180" },
+    },
+    openGraph: {
+      type: "website",
+      siteName: TITLE,
+      title: TITLE,
+      description: DESCRIPTION,
+      locale: "en_US",
+      images: { ...SHARE_IMAGE, alt: TITLE },
+    },
+    twitter: { card: "summary_large_image" },
+  };
+
+  return metadata;
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-dvh bg-linen text-stone-900 antialiased">
-        <header className="border-crust/20 border-b">
-          <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4">
-            {/* biome-ignore lint/performance/noImgElement: a tiny SVG needs no optimisation */}
-            <img src="/icon.svg" alt="" width={32} height={32} />
-            <span className="font-semibold text-crust text-xl">ACME Bakery</span>
-          </div>
-        </header>
-        <main className="mx-auto max-w-2xl px-4 py-8">{children}</main>
+    <html lang="en" className={cn("font-sans", inter.variable)}>
+      <body className="min-h-dvh antialiased">
+        <SiteHeader />
+        <main>{children}</main>
       </body>
     </html>
   );

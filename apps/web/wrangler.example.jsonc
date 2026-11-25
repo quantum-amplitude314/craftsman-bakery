@@ -7,7 +7,11 @@
   "routes": [{ "pattern": "acme-bakery.example.com", "custom_domain": true }],
   "workers_dev": false,
   "preview_urls": false,
-  "vars": { "WRANGLER_BINDING": "on", "BAKERY_TIME_ZONE": "Europe/Prague" },
+  "vars": {
+    "WRANGLER_BINDING": "on",
+    "BAKERY_TIME_ZONE": "Europe/Prague",
+    "WEB_ORIGIN": "https://acme-bakery.example.com"
+  },
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "services": [
     { "binding": "API", "service": "acme-bakery-api" },
@@ -17,7 +21,11 @@
     // Local workerd (OpenNext preview); a named environment suffixes Worker names with `-preview`.
     "preview": {
       "routes": [],
-      "vars": { "WRANGLER_BINDING": "on", "BAKERY_TIME_ZONE": "Europe/Prague" },
+      "vars": {
+        "WRANGLER_BINDING": "on",
+        "BAKERY_TIME_ZONE": "Europe/Prague",
+        "WEB_ORIGIN": "http://localhost:3847"
+      },
       "services": [
         { "binding": "API", "service": "acme-bakery-api-preview" },
         { "binding": "WORKER_SELF_REFERENCE", "service": "acme-bakery-web-preview" }

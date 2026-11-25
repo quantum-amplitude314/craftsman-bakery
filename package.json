@@ -23,6 +23,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "preview": "turbo run preview",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",

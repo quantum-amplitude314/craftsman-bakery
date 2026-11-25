@@ -4,13 +4,20 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { z } from "zod";
 
 const bakeryTimeZone = z.string().min(1);
+/** Where the site is served; absolute URLs such as the share image resolve against it. */
+const webOrigin = z.url();
 
 const envSchema = z
   .discriminatedUnion("WRANGLER_BINDING", [
-    z.object({ WRANGLER_BINDING: z.literal("on"), BAKERY_TIME_ZONE: bakeryTimeZone }),
+    z.object({
+      WRANGLER_BINDING: z.literal("on"),
+      BAKERY_TIME_ZONE: bakeryTimeZone,
+      WEB_ORIGIN: webOrigin,
+    }),
     z.object({
       WRANGLER_BINDING: z.literal("off"),
       BAKERY_TIME_ZONE: bakeryTimeZone,
+      WEB_ORIGIN: webOrigin,
       API_URL: z.url(),
     }),
   ])
