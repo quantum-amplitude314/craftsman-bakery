@@ -1,0 +1,37 @@
+name: acme-bakery
+services:
+  postgres-dev:
+    image: docker.io/library/postgres:18-alpine
+    container_name: acme-bakery-pg-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: acme_bakery
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "acme_bakery"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata-dev:/var/lib/postgresql
+  postgres-test:
+    image: docker.io/library/postgres:18-alpine
+    container_name: acme-bakery-pg-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: acme_bakery_test
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "acme_bakery_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5436:5432"
+    volumes:
+      - pgdata-test:/var/lib/postgresql
+volumes:
+  pgdata-dev:
+  pgdata-test:

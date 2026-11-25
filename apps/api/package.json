@@ -1,0 +1,25 @@
+{
+  "name": "@acme-bakery/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.4",
+  "scripts": {
+    "db:generate": "bun --env-file=.env.development drizzle-kit generate",
+    "db:migrate": "bun --env-file=.env.development drizzle-kit migrate",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@acme-bakery/contracts": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.5",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "catalog:"
+  },
+  "trustedDependencies": []
+}
