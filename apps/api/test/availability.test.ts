@@ -13,16 +13,16 @@ afterAll(() => close());
 
 describe("availability", () => {
   test("lists what is left of each product offered that day, by name", async () => {
-    const rye = await seedProduct({ db, name: "Rye bread" });
-    const croissant = await seedProduct({ db, name: "Croissant" });
+    const rye = await seedProduct({ db, name: "Rye with caraway", description: "Dark rye, 750 g" });
+    const croissant = await seedProduct({ db, name: "Butter croissant" });
     await seedCapacity({ db, productId: rye, pickupDay, limit: 5, reserved: 2 });
     await seedCapacity({ db, productId: croissant, pickupDay, limit: 3, reserved: 3 });
 
     const availability = await getAvailability({ store, cutoff, pickupDay });
 
     expect(availability.products).toEqual([
-      { productId: croissant, name: "Croissant", available: 0 },
-      { productId: rye, name: "Rye bread", available: 3 },
+      { productId: croissant, name: "Butter croissant", description: "", available: 0 },
+      { productId: rye, name: "Rye with caraway", description: "Dark rye, 750 g", available: 3 },
     ]);
   });
 

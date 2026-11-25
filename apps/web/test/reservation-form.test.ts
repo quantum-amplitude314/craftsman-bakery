@@ -63,8 +63,8 @@ describe("reserveFailureOf", () => {
     pickupDay: PICKUP_DAY,
     closesAt: "2026-12-23T18:00",
     products: [
-      { productId: BREAD, name: "Bread", available: 4 },
-      { productId: CROISSANT, name: "Croissant", available: 3 },
+      { productId: BREAD, name: "Bread", description: "", available: 4 },
+      { productId: CROISSANT, name: "Croissant", description: "", available: 3 },
     ],
   };
 

@@ -11,11 +11,14 @@ export const createRequestContext = ({ env, request }: { env: Env; request: Requ
   const queries = createDb({ connectionString: env.HYPERDRIVE_QUERIES.connectionString });
   const { headers } = request;
   const remoteIp = headers.get("CF-Connecting-IP");
+  const checkTurnstile = ({ token }: { token: string }) =>
+    verifyTurnstile({ secret: env.TURNSTILE_SECRET_KEY, token, remoteIp });
   const auth = createAuth({
     db: commands.db,
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.WEB_ORIGIN,
     trustedOrigins: [env.WEB_ORIGIN],
+    verifyTurnstile: checkTurnstile,
   });
   const context: ApiContext = {
     writeStore: createDrizzleWriteStore({ db: commands.db }),
@@ -24,8 +27,7 @@ export const createRequestContext = ({ env, request }: { env: Env; request: Requ
     cutoff: { timeZone: env.BAKERY_TIME_ZONE, time: env.CUTOFF_TIME },
     now: () => new Date(),
     generateCode,
-    verifyTurnstile: ({ token }) =>
-      verifyTurnstile({ secret: env.TURNSTILE_SECRET_KEY, token, remoteIp }),
+    verifyTurnstile: checkTurnstile,
     isStaff: async () => (await auth.api.getSession({ headers })) !== null,
   };
   const close = async () => {

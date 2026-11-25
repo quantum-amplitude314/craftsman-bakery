@@ -5,21 +5,41 @@ import { createTestDb, resetTables, seedStaff } from "./helpers.ts";
 const { db, close } = createTestDb();
 const origin = "http://bakery.test";
 const STAFF = { email: "staff@bakery.test", password: "staff-password" };
+const PASSING_TOKEN = "passing-token";
 const auth = createAuth({
   db,
   secret: "test-secret-at-least-32-characters-long",
   baseURL: origin,
   trustedOrigins: [origin],
+  verifyTurnstile: async ({ token }) => token === PASSING_TOKEN,
 });
 
-const postAuth = ({ path, body }: { path: string; body: unknown }) =>
+const postAuth = ({
+  path,
+  body,
+  turnstileToken = PASSING_TOKEN,
+}: {
+  path: string;
+  body: unknown;
+  turnstileToken?: string | null;
+}) =>
   auth.handler(
     new Request(`${origin}/api/auth${path}`, {
       method: "POST",
-      headers: { "content-type": "application/json", origin },
+      headers: {
+        "content-type": "application/json",
+        origin,
+        ...(turnstileToken && { "x-captcha-response": turnstileToken }),
+      },
       body: JSON.stringify(body),
     }),
   );
+
+const readCode = async (response: Response) => {
+  const { code } = (await response.json()) as { code?: string };
+
+  return code;
+};
 
 beforeEach(async () => {
   await resetTables({ db });
@@ -48,6 +68,26 @@ describe("staff sign-in", () => {
     });
 
     expect(response.status).toBe(401);
+  });
+
+  test("sign-in without a passing Turnstile token is refused before the password is checked", async () => {
+    const { email, password } = STAFF;
+
+    const missing = await postAuth({
+      path: "/sign-in/email",
+      body: { email, password },
+      turnstileToken: null,
+    });
+    const failing = await postAuth({
+      path: "/sign-in/email",
+      body: { email, password },
+      turnstileToken: "failing-token",
+    });
+
+    expect(missing.status).toBe(403);
+    expect(await readCode(missing)).toBe("TURNSTILE_FAILED");
+    expect(failing.status).toBe(403);
+    expect(await readCode(failing)).toBe("TURNSTILE_FAILED");
   });
 
   test("nobody signs up", async () => {

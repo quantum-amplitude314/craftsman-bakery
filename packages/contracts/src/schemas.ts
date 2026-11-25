@@ -49,6 +49,7 @@ export const availabilitySchema = z.object({
     z.object({
       productId: productIdSchema,
       name: z.string(),
+      description: z.string(),
       available: z.int().nonnegative(),
     }),
   ),

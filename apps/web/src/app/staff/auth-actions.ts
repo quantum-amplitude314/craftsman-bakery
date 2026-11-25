@@ -1,18 +1,38 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { sendAuthRequest } from "@/lib/auth";
 import { readSignInForm, type SignInState, signInFailureOf } from "@/lib/sign-in-form";
 
-export const signIn = async (_previous: SignInState, formData: FormData): Promise<SignInState> => {
-  const form = readSignInForm(formData);
-  if (form.status === "invalid") return form;
+/** Better Auth's error body; anything else reads as no code. */
+const authErrorSchema = z.object({ code: z.string().optional() }).catch({});
 
+export const signIn = async (previous: SignInState, formData: FormData): Promise<SignInState> => {
+  const attempt = previous.attempt + 1;
+  const form = readSignInForm(formData);
+  if (form.status === "invalid") {
+    const invalid: SignInState = { ...form, attempt };
+
+    return invalid;
+  }
+
+  const { turnstileToken, ...credentials } = form.input;
   try {
-    const response = await sendAuthRequest({ endpoint: "sign-in/email", body: form.input });
-    if (!response.ok) return signInFailureOf(response.status);
+    const response = await sendAuthRequest({
+      endpoint: "sign-in/email",
+      body: credentials,
+      turnstileToken,
+    });
+    if (!response.ok) {
+      const { status } = response;
+      const { code } = authErrorSchema.parse(await response.json().catch(() => null));
+      const failed: SignInState = { ...signInFailureOf({ status, code }), attempt };
+
+      return failed;
+    }
   } catch {
-    const failed: SignInState = { status: "failed" };
+    const failed: SignInState = { status: "failed", attempt };
 
     return failed;
   }

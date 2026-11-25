@@ -16,6 +16,8 @@ import {
 export const product = pgTable("product", {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull().unique(),
+  /** Shown to customers under the name; empty when there is nothing to add. */
+  description: text().notNull().default(""),
 });
 
 /** One row per product and pickup day; `reserved` moves by atomic conditional updates. */

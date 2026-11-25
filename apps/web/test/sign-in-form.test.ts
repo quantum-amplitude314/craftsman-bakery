@@ -9,37 +9,48 @@ const formOf = (fields: Record<string, string>) => {
 };
 
 describe("readSignInForm", () => {
-  test("reads the email and password", () => {
-    const form = readSignInForm(formOf({ email: "staff@bakery.test", password: "secret" }));
+  test("reads the email, the password and the Turnstile token", () => {
+    const form = readSignInForm(
+      formOf({
+        email: "staff@bakery.test",
+        password: "secret",
+        "cf-turnstile-response": "token",
+      }),
+    );
 
     expect(form).toEqual({
       status: "valid",
-      input: { email: "staff@bakery.test", password: "secret" },
+      input: { email: "staff@bakery.test", password: "secret", turnstileToken: "token" },
     });
   });
 
   test("names every missing field", () => {
     expect(readSignInForm(formOf({}))).toEqual({
       status: "invalid",
-      invalidFields: ["email", "password"],
+      invalidFields: ["email", "password", "turnstile"],
     });
   });
 
   test("rejects an address that is not an email", () => {
-    const form = readSignInForm(formOf({ email: "staff", password: "secret" }));
+    const form = readSignInForm(
+      formOf({ email: "staff", password: "secret", "cf-turnstile-response": "token" }),
+    );
 
     expect(form).toEqual({ status: "invalid", invalidFields: ["email"] });
   });
 });
 
 describe("signInFailureOf", () => {
-  test("tells wrong credentials from too many attempts", () => {
-    expect(signInFailureOf(401)).toEqual({ status: "wrong-credentials" });
-    expect(signInFailureOf(429)).toEqual({ status: "too-many-attempts" });
+  test("tells wrong credentials, too many attempts and a failed Turnstile check apart", () => {
+    expect(signInFailureOf({ status: 401 })).toEqual({ status: "wrong-credentials" });
+    expect(signInFailureOf({ status: 429 })).toEqual({ status: "too-many-attempts" });
+    expect(signInFailureOf({ status: 403, code: "TURNSTILE_FAILED" })).toEqual({
+      status: "turnstile-failed",
+    });
   });
 
   test("reports any other answer as a failure to retry", () => {
-    expect(signInFailureOf(403)).toEqual({ status: "failed" });
-    expect(signInFailureOf(500)).toEqual({ status: "failed" });
+    expect(signInFailureOf({ status: 403, code: "INVALID_ORIGIN" })).toEqual({ status: "failed" });
+    expect(signInFailureOf({ status: 500 })).toEqual({ status: "failed" });
   });
 });

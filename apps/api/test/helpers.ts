@@ -13,8 +13,19 @@ export const resetTables = async ({ db }: { db: Db }) => {
   );
 };
 
-export const seedProduct = async ({ db, name }: { db: Db; name: string }) => {
-  const [created] = await db.insert(product).values({ name }).returning({ id: product.id });
+export const seedProduct = async ({
+  db,
+  name,
+  description,
+}: {
+  db: Db;
+  name: string;
+  description?: string;
+}) => {
+  const [created] = await db
+    .insert(product)
+    .values({ name, description })
+    .returning({ id: product.id });
   if (!created) throw new Error("Product not created");
 
   return created.id;

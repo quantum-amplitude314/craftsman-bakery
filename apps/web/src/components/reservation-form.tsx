@@ -98,6 +98,36 @@ function Receipt({
   );
 }
 
+/** What is left counts down as the customer adds, so it always reads against their order. */
+function ProductRow({ product }: { product: Availability["products"][number] }) {
+  const { productId, name, description, available } = product;
+  const [quantity, setQuantity] = useState(0);
+  const left = Math.max(0, available - quantity);
+
+  return (
+    <li className="flex items-center gap-4 py-3">
+      <div className="flex-1 space-y-0.5">
+        <Label htmlFor={quantityFieldOf(productId)} className="text-base">
+          {name}
+        </Label>
+        {/* 90 % keeps 4.8:1 on the card, just above WCAG AA for small text. */}
+        {description ? <p className="text-muted-foreground/90 text-sm">{description}</p> : null}
+        <p className={available > 0 ? "text-muted-foreground text-sm" : "text-destructive text-sm"}>
+          {available > 0 ? `${left} left` : "Sold out"}
+        </p>
+      </div>
+      <QuantityStepper
+        id={quantityFieldOf(productId)}
+        name={quantityFieldOf(productId)}
+        productName={name}
+        max={available}
+        quantity={quantity}
+        onQuantityChange={setQuantity}
+      />
+    </li>
+  );
+}
+
 export function ReservationForm({ availability }: { availability: Availability }) {
   const [state, dispatch, pending] = useActionState(reserve, INITIAL_STATE);
   const [hasToken, setHasToken] = useState(false);
@@ -127,27 +157,8 @@ export function ReservationForm({ availability }: { availability: Availability }
           </CardHeader>
           <CardContent>
             <ul className="divide-y divide-border">
-              {products.map(({ productId, name, available }) => (
-                <li key={productId} className="flex items-center gap-4 py-3">
-                  <div className="flex-1">
-                    <Label htmlFor={quantityFieldOf(productId)} className="text-base">
-                      {name}
-                    </Label>
-                    <p
-                      className={
-                        available > 0 ? "text-muted-foreground text-sm" : "text-destructive text-sm"
-                      }
-                    >
-                      {available > 0 ? `${available} left` : "Sold out"}
-                    </p>
-                  </div>
-                  <QuantityStepper
-                    id={quantityFieldOf(productId)}
-                    name={quantityFieldOf(productId)}
-                    productName={name}
-                    max={available}
-                  />
-                </li>
+              {products.map((product) => (
+                <ProductRow key={product.productId} product={product} />
               ))}
             </ul>
           </CardContent>
@@ -156,7 +167,6 @@ export function ReservationForm({ availability }: { availability: Availability }
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Your details</CardTitle>
-              <CardDescription>So we know whose order it is when you pick it up.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

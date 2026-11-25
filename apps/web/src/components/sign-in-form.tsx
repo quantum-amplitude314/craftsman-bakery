@@ -1,19 +1,21 @@
 "use client";
 
-import { type FormEvent, startTransition, useActionState } from "react";
+import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { signIn } from "@/app/staff/auth-actions";
 import { FormMessage } from "@/components/form-message";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { SignInFormField, SignInState } from "@/lib/sign-in-form";
 
-const INITIAL_STATE: SignInState = { status: "editing" };
+const INITIAL_STATE: SignInState = { status: "editing", attempt: 0 };
 
 const FIELD_HINTS: Record<SignInFormField, string> = {
   email: "Enter your email address.",
   password: "Enter your password.",
+  turnstile: "Complete the check above the button.",
 };
 
 function StatusMessage({ state }: { state: SignInState }) {
@@ -30,6 +32,8 @@ function StatusMessage({ state }: { state: SignInState }) {
       );
     case "wrong-credentials":
       return <FormMessage>The email or password is wrong.</FormMessage>;
+    case "turnstile-failed":
+      return <FormMessage>The check did not pass. Complete it again and sign in.</FormMessage>;
     case "too-many-attempts":
       return <FormMessage>Too many attempts; wait a minute and try again.</FormMessage>;
     case "failed":
@@ -41,6 +45,7 @@ function StatusMessage({ state }: { state: SignInState }) {
 
 export function SignInForm({ email, password }: { email: string; password: string }) {
   const [state, dispatch, pending] = useActionState(signIn, INITIAL_STATE);
+  const [hasToken, setHasToken] = useState(false);
 
   // An action passed as `action` resets the form after it runs; submitting by hand keeps the input.
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -77,10 +82,16 @@ export function SignInForm({ email, password }: { email: string; password: strin
           </div>
         </CardContent>
       </Card>
+      <TurnstileWidget key={state.attempt} onTokenChange={(token) => setHasToken(token !== null)} />
       <div aria-live="polite">
         <StatusMessage state={state} />
       </div>
-      <Button type="submit" size="lg" className="h-12 w-full text-base" disabled={pending}>
+      <Button
+        type="submit"
+        size="lg"
+        className="h-12 w-full text-base"
+        disabled={pending || !hasToken}
+      >
         {pending ? "Signing in…" : "Sign in"}
       </Button>
     </form>

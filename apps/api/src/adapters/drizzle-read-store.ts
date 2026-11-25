@@ -15,6 +15,7 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
         .select({
           productId: product.id,
           name: product.name,
+          description: product.description,
           available: sql<number>`${effectiveCapacity} - coalesce(${capacity.reserved}, 0)`.mapWith(
             Number,
           ),

@@ -32,15 +32,17 @@ export const getStaffSession = async () => {
 
 /**
  * Posts to Better Auth from a server action. The browser never talks to the API, so the action
- * sends the site's Origin and the visitor's IP for the rate limit, and passes the answered
- * cookies on to the browser.
+ * sends the site's Origin, the visitor's IP for the rate limit and Turnstile, and the Turnstile
+ * token, and passes the answered cookies on to the browser.
  */
 export const sendAuthRequest = async ({
   endpoint,
   body,
+  turnstileToken,
 }: {
   endpoint: "sign-in/email" | "sign-out";
   body: Record<string, unknown>;
+  turnstileToken?: string | undefined;
 }) => {
   const cookieStore = await cookies();
   const visitorIp = (await headers()).get("cf-connecting-ip");
@@ -52,6 +54,7 @@ export const sendAuthRequest = async ({
       Origin: webOrigin,
       Cookie: cookieStore.toString(),
       ...(visitorIp && { "X-Forwarded-For": visitorIp }),
+      ...(turnstileToken && { "x-captcha-response": turnstileToken }),
     },
     body: JSON.stringify(body),
   });

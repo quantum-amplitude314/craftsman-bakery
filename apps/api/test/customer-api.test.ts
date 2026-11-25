@@ -28,7 +28,7 @@ afterAll(() => close());
 
 describe("customer API", () => {
   test("GET /availability lists what is left for a pickup day", async () => {
-    const bread = await seedProduct({ db, name: "Bread" });
+    const bread = await seedProduct({ db, name: "Bread", description: "Sourdough, 1 kg" });
     await seedCapacity({ db, productId: bread, pickupDay, limit: 5, reserved: 1 });
 
     const { status, body } = await send({
@@ -40,7 +40,7 @@ describe("customer API", () => {
     expect(body).toEqual({
       pickupDay,
       closesAt: "2026-12-23T18:00",
-      products: [{ productId: bread, name: "Bread", available: 4 }],
+      products: [{ productId: bread, name: "Bread", description: "Sourdough, 1 kg", available: 4 }],
     });
   });
 

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { verifyTurnstile } from "./adapters/turnstile.ts";
 import { createAuth } from "./auth/auth.ts";
 import { createDb } from "./db/client.ts";
 import { createApiHandler } from "./http/handler.ts";
@@ -37,11 +38,21 @@ app.on(["GET", "POST"], "/api/auth/*", async (context) => {
   const {
     HYPERDRIVE_COMMANDS: hyperdrive,
     BETTER_AUTH_SECRET: secret,
+    TURNSTILE_SECRET_KEY: turnstileSecret,
     WEB_ORIGIN: webOrigin,
   } = context.env;
   const { db, close } = createDb({ connectionString: hyperdrive.connectionString });
-  const auth = createAuth({ db, secret, baseURL: webOrigin, trustedOrigins: [webOrigin] });
-  const response = await auth.handler(context.req.raw);
+  const { raw: request } = context.req;
+  // The web's server action forwards the visitor's IP as X-Forwarded-For, for the rate limit too.
+  const remoteIp = request.headers.get("X-Forwarded-For");
+  const auth = createAuth({
+    db,
+    secret,
+    baseURL: webOrigin,
+    trustedOrigins: [webOrigin],
+    verifyTurnstile: ({ token }) => verifyTurnstile({ secret: turnstileSecret, token, remoteIp }),
+  });
+  const response = await auth.handler(request);
   context.executionCtx.waitUntil(close());
 
   return response;
