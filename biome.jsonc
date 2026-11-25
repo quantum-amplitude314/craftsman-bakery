@@ -1,0 +1,20 @@
+{
+  // After copying, run `biome migrate --write` to sync $schema with the installed Biome.
+  "$schema": "https://biomejs.dev/schemas/2.6.9/schema.json",
+  // Ignored paths come from .gitignore. Lint a gitignored nested repo from the root with
+  // `biome check --write --vcs-use-ignore-file=false --no-errors-on-unmatched <path>`.
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
+  "linter": { "enabled": true, "rules": { "preset": "recommended" } },
+  "assist": { "enabled": true, "actions": { "source": { "organizeImports": "on" } } },
+  "html": { "formatter": { "enabled": true } },
+  // Markdown stays as written: no formatting, no lint fixes.
+  "markdown": { "formatter": { "enabled": false }, "linter": { "enabled": false } },
+  "javascript": {
+    "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
+  }
+  // Tailwind:
+  // "css": { "parser": { "tailwindDirectives": true } },
+  // shadcn (the CLI overwrites these files; adjust the path to the project layout):
+  // "overrides": [{ "includes": ["components/ui/**"], "linter": { "enabled": false } }]
+}

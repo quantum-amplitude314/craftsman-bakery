@@ -1,0 +1,36 @@
+# private: nested repo
+docs/
+.ignore
+
+# agent files
+AGENTS.md
+CLAUDE.md
+.claude/
+.agents/
+.opencode/
+skills-lock.json
+
+node_modules/
+.turbo/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.development
+!.env.test
+
+# cloudflare
+.wrangler/
+wrangler.json
+wrangler.jsonc
+wrangler.toml
+worker-configuration.d.ts
+cloudflare-env.d.ts
+.dev.vars
+.dev.vars.*
+
+# next
+.next/
+.open-next/
+next-env.d.ts
