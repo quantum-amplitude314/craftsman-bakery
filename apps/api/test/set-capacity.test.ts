@@ -86,3 +86,13 @@ describe("set capacity", () => {
     expect(status).toBe(401);
   });
 });
+
+describe("set capacity limits", () => {
+  test("refuses a capacity above the maximum", async () => {
+    const bread = await seedProduct({ db, name: "Bread" });
+
+    const { status } = await setCapacity({ productId: bread, capacity: 10_000 });
+
+    expect(status).toBe(400);
+  });
+});

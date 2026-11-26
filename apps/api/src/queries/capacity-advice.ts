@@ -1,5 +1,5 @@
-import { weekdayOf } from "@craftsman-bakery/contracts";
-import { type CutoffConfig, closesAtOf, wallClock } from "../rules/cutoff.ts";
+import { wallClockOf, weekdayOf } from "@craftsman-bakery/contracts";
+import { type CutoffConfig, closesAtOf } from "../rules/cutoff.ts";
 import { suggestedCapacityOf } from "../rules/suggested-capacity.ts";
 import type { DemandAdvisor } from "./demand-advisor.ts";
 import type { ReservationReadStore } from "./ports.ts";
@@ -25,7 +25,7 @@ export const getCapacityAdvice = async ({
   const day = {
     pickupDay,
     weekday: weekdayOf(pickupDay),
-    bakeryClockNow: wallClock({ instant: now, timeZone }),
+    bakeryClockNow: wallClockOf({ instant: now, timeZone }),
     reservationsCloseAt: closesAtOf({ pickupDay, cutoff }),
     products,
   };

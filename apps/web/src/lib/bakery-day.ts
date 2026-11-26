@@ -1,18 +1,3 @@
-/** Today's date as YYYY-MM-DD on the bakery's clock; the Worker itself runs in UTC. */
-export const todayIn = ({ now, timeZone }: { now: Date; timeZone: string }) => {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const partOf = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value;
-  const today = `${partOf("year")}-${partOf("month")}-${partOf("day")}`;
-
-  return today;
-};
-
 const dayFormat = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
   weekday: "long",

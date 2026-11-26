@@ -75,10 +75,12 @@ export const pickupListSchema = z.object({
 });
 export type PickupList = z.infer<typeof pickupListSchema>;
 
+export const CAPACITY_MAX = 9999;
+
 export const capacityInputSchema = z.object({
   pickupDay: pickupDaySchema,
   productId: productIdSchema,
-  capacity: z.int().nonnegative(),
+  capacity: z.int().nonnegative().max(CAPACITY_MAX),
 });
 export type CapacityInput = z.infer<typeof capacityInputSchema>;
 

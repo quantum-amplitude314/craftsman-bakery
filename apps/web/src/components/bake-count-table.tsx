@@ -1,18 +1,13 @@
 "use client";
 
-import type { DayCapacity } from "@craftsman-bakery/contracts";
+import { CAPACITY_MAX, type DayCapacity } from "@craftsman-bakery/contracts";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { saveCapacities } from "@/app/staff/day-actions";
 import { FieldError } from "@/components/field-error";
 import { SessionExpired } from "@/components/session-expired";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  CAPACITY_MAX,
-  type CapacityState,
-  capacityFieldOf,
-  readCapacityChanges,
-} from "@/lib/capacity-form";
+import { type CapacityState, capacityFieldOf, readCapacityChanges } from "@/lib/capacity-form";
 import { focusFirstInvalid } from "@/lib/use-field-errors";
 
 type ProductCapacity = DayCapacity["products"][number];

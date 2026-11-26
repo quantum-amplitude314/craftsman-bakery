@@ -1,8 +1,6 @@
-import { capacityInputSchema } from "@craftsman-bakery/contracts";
+import { CAPACITY_MAX, capacityInputSchema } from "@craftsman-bakery/contracts";
 import { ORPCError } from "@orpc/client";
 import { z } from "zod";
-
-export const CAPACITY_MAX = 9999;
 
 const CAPACITY_FIELD_PREFIX = "capacity:";
 

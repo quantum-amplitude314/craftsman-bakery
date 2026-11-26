@@ -1,28 +1,19 @@
 "use client";
 
-import {
-  type Availability,
-  NAME_MAX_LENGTH,
-  type ReservationReceipt,
-} from "@craftsman-bakery/contracts";
-import Link from "next/link";
+import { type Availability, NAME_MAX_LENGTH } from "@craftsman-bakery/contracts";
 import { type FormEvent, startTransition, useActionState, useState } from "react";
 import { reserve } from "@/app/reserve-action";
 import { FieldError } from "@/components/field-error";
 import { FormMessage } from "@/components/form-message";
-import { QuantityStepper } from "@/components/quantity-stepper";
+import { ProductRow } from "@/components/product-row";
+import { ReservationReceipt } from "@/components/reservation-receipt";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatDay, formatWallClock } from "@/lib/bakery-day";
-import {
-  type FormField,
-  quantityFieldOf,
-  type ReserveState,
-  readReservationForm,
-} from "@/lib/reservation-form";
+import { formatWallClock } from "@/lib/bakery-day";
+import { type FormField, type ReserveState, readReservationForm } from "@/lib/reservation-form";
 import { focusFirstInvalid, useFieldErrors } from "@/lib/use-field-errors";
 
 const INITIAL_STATE: ReserveState = { status: "editing", attempt: 0 };
@@ -72,84 +63,13 @@ function StatusMessage({ state, closesAt }: { state: ReserveState; closesAt: str
   }
 }
 
-function Receipt({
-  receipt: { code, pickupDay },
-  closesAt,
-}: {
-  receipt: ReservationReceipt;
-  closesAt: string;
-}) {
-  return (
-    <Card aria-live="polite">
-      <CardHeader>
-        <CardTitle className="text-xl">Reserved</CardTitle>
-        <CardDescription>Pick up on {formatDay(pickupDay)}.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <p className="text-muted-foreground text-sm">Your code, to tell us at the counter</p>
-          <p className="font-mono text-5xl text-primary tracking-[0.2em]">{code}</p>
-        </div>
-        <p className="text-muted-foreground">
-          Plans changed?{" "}
-          <Link href={`/cancel?code=${code}`} className="text-primary underline underline-offset-4">
-            Cancel with the code
-          </Link>{" "}
-          until {formatWallClock(closesAt)}.
-        </p>
-        <Button variant="outline" size="lg" nativeButton={false} render={<Link href="/" />}>
-          Make another reservation
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ProductRow({
-  product,
-  onQuantityChange,
-}: {
-  product: Availability["products"][number];
-  onQuantityChange: () => void;
-}) {
-  const { productId, name, description, available } = product;
-  const [quantity, setQuantity] = useState(0);
-  const changeQuantity = (next: number) => {
-    setQuantity(next);
-    onQuantityChange();
-  };
-  const left = Math.max(0, available - quantity);
-
-  return (
-    <li className="flex items-center gap-4 py-3">
-      <div className="flex-1 space-y-0.5">
-        <Label htmlFor={quantityFieldOf(productId)} className="text-base">
-          {name}
-        </Label>
-        {description ? <p className="text-muted-foreground/90 text-sm">{description}</p> : null}
-        <p className={available > 0 ? "text-muted-foreground text-sm" : "text-destructive text-sm"}>
-          {available > 0 ? `${left} left` : "Sold out"}
-        </p>
-      </div>
-      <QuantityStepper
-        id={quantityFieldOf(productId)}
-        name={quantityFieldOf(productId)}
-        productName={name}
-        max={available}
-        quantity={quantity}
-        onQuantityChange={changeQuantity}
-      />
-    </li>
-  );
-}
-
 export function ReservationForm({ availability }: { availability: Availability }) {
   const [state, dispatch, pending] = useActionState(reserve, INITIAL_STATE);
   const [hasToken, setHasToken] = useState(false);
   const { setInvalidFields, errorOf, clearError, ariaOf } = useFieldErrors(FIELD_HINTS);
 
   if (state.status === "reserved") {
-    return <Receipt receipt={state.receipt} closesAt={availability.closesAt} />;
+    return <ReservationReceipt receipt={state.receipt} closesAt={availability.closesAt} />;
   }
 
   const { pickupDay, closesAt, products } =

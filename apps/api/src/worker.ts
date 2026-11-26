@@ -1,3 +1,4 @@
+import { wallClockOf } from "@craftsman-bakery/contracts";
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { verifyTurnstile } from "./adapters/turnstile.ts";
@@ -6,7 +7,7 @@ import { createDb } from "./db/client.ts";
 import { createApiHandler } from "./http/handler.ts";
 import { createRequestContext } from "./http/request-context.ts";
 import { teapot } from "./http/teapot.ts";
-import { nextOpenPickupDay, wallClock } from "./rules/cutoff.ts";
+import { nextOpenPickupDay } from "./rules/cutoff.ts";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -23,7 +24,7 @@ app.get("/api/health", async (context) => {
   const health = {
     databaseTime: rows[0]?.database_time,
     workerTime: now.toISOString(),
-    bakeryClock: wallClock({ instant: now, timeZone }),
+    bakeryClock: wallClockOf({ instant: now, timeZone }),
     nextPickupDay: nextOpenPickupDay({ now, cutoff: { timeZone, time } }),
   };
 
