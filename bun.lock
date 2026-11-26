@@ -80,6 +80,7 @@
       "name": "@craftsman-bakery/maintain",
       "version": "0.1.0",
       "dependencies": {
+        "@craftsman-bakery/contracts": "workspace:*",
         "better-auth": "catalog:",
       },
       "devDependencies": {

@@ -1,6 +1,6 @@
 "use server";
 
-import { codeSchema } from "@craftsman-bakery/contracts";
+import { capacityInputSchema, codeSchema, pickupDaySchema } from "@craftsman-bakery/contracts";
 import { refresh } from "next/cache";
 import { apiClient } from "@/lib/api";
 import {
@@ -8,6 +8,8 @@ import {
   capacitySaveOutcomeOf,
   readCapacityChanges,
 } from "@/lib/capacity-form";
+import type { ClefAdviceState } from "@/lib/clef-advice";
+import { loadClefAdvice } from "@/lib/load-clef-advice";
 import { type StaffCancelOutcome, staffCancelFailureOf } from "@/lib/staff-cancel";
 
 export const cancelReservation = async (code: string): Promise<StaffCancelOutcome> => {
@@ -50,4 +52,30 @@ export const saveCapacities = async (
   if (outcome.status !== "signed-out") refresh();
 
   return outcome;
+};
+
+/** Staff take the advisor's suggestion as the product's capacity for the day. */
+export const acceptSuggestion = async (suggestion: unknown): Promise<CapacityState> => {
+  const parsed = capacityInputSchema.safeParse(suggestion);
+  if (!parsed.success) return { status: "failed" };
+
+  const { data: capacity } = parsed;
+  const { productId } = capacity;
+  const result = await apiClient.staff.setCapacity(capacity).then(
+    () => ({ productId }),
+    (error: unknown) => ({ productId, error }),
+  );
+  const outcome = capacitySaveOutcomeOf([result]);
+  if (outcome.status !== "signed-out") refresh();
+
+  return outcome;
+};
+
+export const askClef = async (pickupDay: unknown): Promise<ClefAdviceState> => {
+  const parsed = pickupDaySchema.safeParse(pickupDay);
+  if (!parsed.success) return { status: "failed" };
+
+  const advice = await loadClefAdvice(parsed.data);
+
+  return advice;
 };

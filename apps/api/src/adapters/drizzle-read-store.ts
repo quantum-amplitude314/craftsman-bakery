@@ -1,7 +1,14 @@
 import type { PickupList } from "@craftsman-bakery/contracts";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, lt, sql } from "drizzle-orm";
 import type { Db } from "../db/client.ts";
-import { capacity, defaultCapacity, product, reservation, reservationItem } from "../db/schema.ts";
+import {
+  bakeHistory,
+  capacity,
+  defaultCapacity,
+  product,
+  reservation,
+  reservationItem,
+} from "../db/schema.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
 
 type PickupReservation = PickupList["reservations"][number];
@@ -47,6 +54,44 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
         .leftJoin(capacity, capacityOnDay(pickupDay))
         .leftJoin(defaultCapacity, defaultOnWeekdayOf(pickupDay))
         .orderBy(asc(product.name)),
+    adviceInputsOn: async ({ pickupDay, recentBakes }) => {
+      const [products, bakes] = await Promise.all([
+        db
+          .select({
+            productId: product.id,
+            name: product.name,
+            defaultCapacity: defaultCapacity.capacity,
+            reserved: sql<number>`coalesce(${capacity.reserved}, 0)`.mapWith(Number),
+          })
+          .from(product)
+          .leftJoin(capacity, capacityOnDay(pickupDay))
+          .leftJoin(defaultCapacity, defaultOnWeekdayOf(pickupDay))
+          .orderBy(asc(product.name)),
+        db
+          .select({
+            productId: bakeHistory.productId,
+            day: bakeHistory.day,
+            baked: bakeHistory.baked,
+          })
+          .from(bakeHistory)
+          .where(
+            and(
+              lt(bakeHistory.day, pickupDay),
+              sql`extract(isodow from ${bakeHistory.day}) = extract(isodow from ${pickupDay}::date)`,
+            ),
+          )
+          .orderBy(desc(bakeHistory.day)),
+      ]);
+      const withBakes = products.map((row) => ({
+        ...row,
+        recentBakes: bakes
+          .filter(({ productId }) => productId === row.productId)
+          .slice(0, recentBakes)
+          .map(({ day, baked }) => ({ day, baked })),
+      }));
+
+      return withBakes;
+    },
     pickupListOn: async ({ pickupDay }) => {
       const rows = await db
         .select({

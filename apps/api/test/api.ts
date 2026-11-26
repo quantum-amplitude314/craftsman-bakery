@@ -2,6 +2,7 @@ import { createDrizzleReadStore } from "../src/adapters/drizzle-read-store.ts";
 import { createDrizzleWriteStore } from "../src/adapters/drizzle-write-store.ts";
 import type { Db } from "../src/db/client.ts";
 import { type ApiContext, createApiHandler } from "../src/http/handler.ts";
+import type { DayForAdvice, ProductDemand } from "../src/queries/demand-advisor.ts";
 import { codesFrom } from "./helpers.ts";
 
 const handler = createApiHandler();
@@ -12,12 +13,14 @@ export const createApiTestContext = ({
   isStaff = false,
   now = "2026-12-23T12:00:00Z",
   codes = ["K7M2"],
+  advise = async () => [],
 }: {
   db: Db;
   turnstilePasses?: boolean;
   isStaff?: boolean;
   now?: string;
   codes?: string[];
+  advise?: (day: DayForAdvice) => Promise<ProductDemand[]>;
 }) => {
   const readStore = createDrizzleReadStore({ db });
   const context: ApiContext = {
@@ -29,6 +32,7 @@ export const createApiTestContext = ({
     generateCode: codesFrom(codes),
     verifyTurnstile: async () => turnstilePasses,
     isStaff: async () => isStaff,
+    demandAdvisor: { adviseOn: advise },
   };
 
   return context;

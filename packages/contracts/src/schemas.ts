@@ -95,3 +95,27 @@ export const dayCapacitySchema = z.object({
   ),
 });
 export type DayCapacity = z.infer<typeof dayCapacitySchema>;
+
+/** How a product's demand on a day compares with a usual same weekday. */
+export const DEMAND_OUTLOOKS = ["much_less", "less", "usual", "more", "much_more"] as const;
+export type DemandOutlook = (typeof DEMAND_OUTLOOKS)[number];
+
+export const demandProbabilitiesSchema = z.record(
+  z.enum(DEMAND_OUTLOOKS),
+  z.number().min(0).max(1),
+);
+
+export const capacityAdviceSchema = z.object({
+  pickupDay: pickupDaySchema,
+  /** False when the advisor could not answer; the defaults stay. */
+  available: z.boolean(),
+  products: z.array(
+    z.object({
+      productId: productIdSchema,
+      /** Null for a product without a default capacity. */
+      suggested: z.int().nonnegative().nullable(),
+      probabilities: demandProbabilitiesSchema,
+    }),
+  ),
+});
+export type CapacityAdvice = z.infer<typeof capacityAdviceSchema>;

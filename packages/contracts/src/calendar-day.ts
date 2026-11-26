@@ -6,3 +6,8 @@ const calendarDayOf = (instant: Date) => instant.toISOString().slice(0, 10);
 /** Unix time has no daylight saving, so a day is always 24 hours. */
 export const addDays = ({ day, days }: { day: string; days: number }) =>
   calendarDayOf(new Date(Date.parse(day) + days * DAY_MS));
+
+const weekdayFormat = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "long" });
+
+/** "Thursday" for a YYYY-MM-DD day. */
+export const weekdayOf = (day: string) => weekdayFormat.format(new Date(day));

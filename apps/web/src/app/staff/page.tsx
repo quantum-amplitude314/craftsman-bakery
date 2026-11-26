@@ -28,6 +28,10 @@ export default function StaffPage({ searchParams }: PageProps<"/staff">) {
           <StaffDay searchParams={searchParams} />
         </Suspense>
       </SectionError>
+      <p className="text-right text-muted-foreground text-xs">
+        Suggestions come from Clef, Cloudflare&apos;s small decision model, which predicts from the
+        bakery&apos;s recent bakes and reservations. Staff decide.
+      </p>
     </section>
   );
 }

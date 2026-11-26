@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { addDays } from "../src/calendar-day.ts";
+import { addDays, weekdayOf } from "../src/calendar-day.ts";
 
 describe("addDays", () => {
   test("moves a day forward and back across month and year ends", () => {
@@ -9,5 +9,11 @@ describe("addDays", () => {
 
   test("ignores daylight saving changes on the bakery's clock", () => {
     expect(addDays({ day: "2026-10-25", days: 1 })).toBe("2026-10-26");
+  });
+});
+
+describe("weekdayOf", () => {
+  test("names the weekday of a calendar day", () => {
+    expect(weekdayOf("2026-11-27")).toBe("Friday");
   });
 });

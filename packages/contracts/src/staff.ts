@@ -2,6 +2,7 @@ import { oc } from "@orpc/contract";
 import { z } from "zod";
 import { capacityBelowReserved, notFound, unauthorized } from "./errors.ts";
 import {
+  capacityAdviceSchema,
   capacityInputSchema,
   codeSchema,
   dayCapacitySchema,
@@ -38,6 +39,15 @@ export const staffContract = {
     })
     .input(pickupDayInputSchema)
     .output(dayCapacitySchema)
+    .errors(unauthorized),
+  capacityAdvice: oc
+    .route({
+      method: "GET",
+      path: "/staff/capacity-advice",
+      summary: "The advisor's suggested capacity per product for a pickup day",
+    })
+    .input(pickupDayInputSchema)
+    .output(capacityAdviceSchema)
     .errors(unauthorized),
   pickupList: oc
     .route({

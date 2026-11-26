@@ -14,6 +14,7 @@
     "WEB_ORIGIN": "https://craftsman-bakery.example.com"
   },
   "secrets": { "required": ["BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY"] },
+  "ai": { "binding": "AI" },
   "hyperdrive": [
     { "binding": "HYPERDRIVE_COMMANDS", "id": "<hyperdrive id, caching off>" },
     { "binding": "HYPERDRIVE_QUERIES", "id": "<hyperdrive id, caching on>" }
@@ -27,6 +28,7 @@
         "WEB_ORIGIN": "http://localhost:3847"
       },
       "secrets": { "required": ["BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY"] },
+      "ai": { "binding": "AI" },
       "hyperdrive": [
         {
           "binding": "HYPERDRIVE_COMMANDS",
@@ -48,6 +50,7 @@
         "WEB_ORIGIN": "http://localhost:3847"
       },
       "secrets": { "required": ["BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY"] },
+      "ai": { "binding": "AI" },
       "hyperdrive": [
         {
           "binding": "HYPERDRIVE_COMMANDS",

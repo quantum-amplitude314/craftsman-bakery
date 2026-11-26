@@ -1,3 +1,4 @@
+import { createClefDemandAdvisor } from "../adapters/clef-demand-advisor.ts";
 import { createDrizzleReadStore } from "../adapters/drizzle-read-store.ts";
 import { createDrizzleWriteStore } from "../adapters/drizzle-write-store.ts";
 import { verifyTurnstile } from "../adapters/turnstile.ts";
@@ -29,6 +30,7 @@ export const createRequestContext = ({ env, request }: { env: Env; request: Requ
     generateCode,
     verifyTurnstile: checkTurnstile,
     isStaff: async () => (await auth.api.getSession({ headers })) !== null,
+    demandAdvisor: createClefDemandAdvisor({ ai: env.AI }),
   };
   const close = async () => {
     await Promise.all([commands.close(), queries.close()]);

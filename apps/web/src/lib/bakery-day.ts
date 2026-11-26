@@ -20,13 +20,8 @@ const dayFormat = new Intl.DateTimeFormat("en-GB", {
   month: "long",
 });
 
-const weekdayFormat = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "long" });
-
 /** "Thursday 26 November" for a YYYY-MM-DD day. */
 export const formatDay = (day: string) => dayFormat.format(new Date(`${day}T00:00:00Z`));
-
-/** "Thursday" for a YYYY-MM-DD day. */
-export const formatWeekday = (day: string) => weekdayFormat.format(new Date(`${day}T00:00:00Z`));
 
 /** "Wednesday 25 November, 18:00" for a bakery wall-clock time such as "2026-11-25T18:00". */
 export const formatWallClock = (wallClock: string) => {

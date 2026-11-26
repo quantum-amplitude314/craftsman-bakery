@@ -6,7 +6,9 @@ import type { ReservationWriteStore } from "../commands/ports.ts";
 import { reserveItems } from "../commands/reserve-items.ts";
 import { setCapacity } from "../commands/set-capacity.ts";
 import { getAvailability } from "../queries/availability.ts";
+import { getCapacityAdvice } from "../queries/capacity-advice.ts";
 import { getDayCapacity } from "../queries/day-capacity.ts";
+import type { DemandAdvisor } from "../queries/demand-advisor.ts";
 import { getPickupList } from "../queries/pickup-list.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
 import { type CutoffConfig, nextOpenPickupDay } from "../rules/cutoff.ts";
@@ -22,6 +24,7 @@ export type ApiContext = {
   generateCode: () => string;
   verifyTurnstile: (input: { token: string }) => Promise<boolean>;
   isStaff: () => Promise<boolean>;
+  demandAdvisor: DemandAdvisor;
 };
 
 const implementedContract = {
@@ -33,6 +36,7 @@ const implementedContract = {
   staff: {
     cancel: contract.staff.cancel,
     capacity: contract.staff.capacity,
+    capacityAdvice: contract.staff.capacityAdvice,
     pickupList: contract.staff.pickupList,
     setCapacity: contract.staff.setCapacity,
   },
@@ -142,6 +146,20 @@ const router = api.router({
 
       return getDayCapacity({ store: freshReadStore, pickupDay });
     }),
+    capacityAdvice: api.staff.capacityAdvice.handler(
+      async ({ input: { pickupDay }, context, errors }) => {
+        const { isStaff, freshReadStore, demandAdvisor, cutoff, now } = context;
+        if (!(await isStaff())) throw errors.UNAUTHORIZED();
+
+        return getCapacityAdvice({
+          store: freshReadStore,
+          advisor: demandAdvisor,
+          pickupDay,
+          cutoff,
+          now: now(),
+        });
+      },
+    ),
     pickupList: api.staff.pickupList.handler(async ({ input: { pickupDay }, context, errors }) => {
       const { isStaff, freshReadStore } = context;
       if (!(await isStaff())) throw errors.UNAUTHORIZED();
