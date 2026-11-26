@@ -1,7 +1,7 @@
 "use client";
 
 import type { DayCapacity, DemandOutlook } from "@craftsman-bakery/contracts";
-import { useState, useTransition } from "react";
+import { type ReactNode, useState, useTransition } from "react";
 import { askClef } from "@/app/staff/day-actions";
 import { AcceptSuggestionButton } from "@/components/accept-suggestion-button";
 import { SessionExpired } from "@/components/session-expired";
@@ -29,7 +29,7 @@ export function ClefSuggestionCard({
 }: {
   title: string;
   description: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <StaffCard>

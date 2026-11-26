@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const DAY_CHOICES = ["today", "tomorrow", "day-after"] as const;
 
-export type DayChoice = (typeof DAY_CHOICES)[number];
+type DayChoice = (typeof DAY_CHOICES)[number];
 
 const DAYS_AHEAD: Record<DayChoice, number> = { today: 0, tomorrow: 1, "day-after": 2 };
 

@@ -17,7 +17,7 @@ import { apiClient } from "@/lib/api";
 import { formatDay } from "@/lib/bakery-day";
 import { getEnv } from "@/lib/env";
 
-export type StaffDaySearchParams = Promise<{ day?: string | string[] }>;
+type StaffDaySearchParams = Promise<{ day?: string | string[] }>;
 
 /** On the bakery's clock, never the viewer's. */
 const bakeryToday = async () => {
@@ -88,11 +88,13 @@ export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchP
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div className="space-y-6">
           <BakeCountCard {...dayCapacity} />
-          <SectionError>
-            <Suspense fallback={<ClefSuggestionSkeleton />}>
-              <ClefSuggestionSection {...dayCapacity} />
-            </Suspense>
-          </SectionError>
+          {choice === "today" ? null : (
+            <SectionError>
+              <Suspense fallback={<ClefSuggestionSkeleton />}>
+                <ClefSuggestionSection {...dayCapacity} />
+              </Suspense>
+            </SectionError>
+          )}
         </div>
         <PickupListCard reservations={pickupList.reservations} />
       </div>

@@ -1,6 +1,6 @@
 {
   "name": "craftsman-bakery",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "packageManager": "bun@1.4.4",
@@ -27,7 +27,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "lint:fix": "biome check --write . && biome check --write --vcs-use-ignore-file=false --no-errors-on-unmatched packages/maintain",
+    "lint:fix": "biome check --write . && biome check --write --vcs-use-ignore-file=false --no-errors-on-unmatched packages/maintain/demo packages/maintain/worker",
     "db:up": "podman compose up -d --wait",
     "db:down": "podman compose down",
     "db:generate": "bun run --cwd apps/api db:generate",

@@ -1,3 +1,4 @@
+import { type AdviceCache, createCachedDemandAdvisor } from "../adapters/cached-demand-advisor.ts";
 import { createClefDemandAdvisor } from "../adapters/clef-demand-advisor.ts";
 import { createDrizzleReadStore } from "../adapters/drizzle-read-store.ts";
 import { createDrizzleWriteStore } from "../adapters/drizzle-write-store.ts";
@@ -6,6 +7,8 @@ import { createAuth } from "../auth/auth.ts";
 import { createDb } from "../db/client.ts";
 import { generateCode } from "../rules/code.ts";
 import type { ApiContext } from "./handler.ts";
+
+const isolateAdviceCache: AdviceCache = new Map();
 
 export const createRequestContext = ({ env, request }: { env: Env; request: Request }) => {
   const commands = createDb({ connectionString: env.HYPERDRIVE_COMMANDS.connectionString });
@@ -30,7 +33,10 @@ export const createRequestContext = ({ env, request }: { env: Env; request: Requ
     generateCode,
     verifyTurnstile: checkTurnstile,
     isStaff: async () => (await auth.api.getSession({ headers })) !== null,
-    demandAdvisor: createClefDemandAdvisor({ ai: env.AI }),
+    demandAdvisor: createCachedDemandAdvisor({
+      advisor: createClefDemandAdvisor({ ai: env.AI }),
+      cache: isolateAdviceCache,
+    }),
   };
   const close = async () => {
     await Promise.all([commands.close(), queries.close()]);
