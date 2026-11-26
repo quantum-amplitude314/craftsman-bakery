@@ -3,11 +3,13 @@ import { ORPCError } from "@orpc/client";
 export type StaffCancelOutcome =
   | { status: "cancelled" }
   | { status: "not-found" }
+  | { status: "picked-up" }
   | { status: "signed-out" }
   | { status: "failed" };
 
 const FAILURES_BY_CODE: Record<string, StaffCancelOutcome> = {
   NOT_FOUND: { status: "not-found" },
+  PICKED_UP: { status: "picked-up" },
   UNAUTHORIZED: { status: "signed-out" },
 };
 

@@ -104,6 +104,7 @@ describe("staff queries", () => {
           code: "AAAA",
           name: "Ada",
           phone: "+420 777 123 456",
+          pickedUp: false,
           items: [
             { productId: bread, name: "Bread", quantity: 1 },
             { productId: croissant, name: "Croissant", quantity: 3 },
@@ -113,6 +114,7 @@ describe("staff queries", () => {
           code: "BBBB",
           name: "Bob",
           phone: "+420 777 123 456",
+          pickedUp: false,
           items: [{ productId: bread, name: "Bread", quantity: 2 }],
         },
       ],

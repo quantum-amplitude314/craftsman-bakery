@@ -15,11 +15,13 @@ export const cancelReservation = async ({
   code: string;
   cancelledBy: "customer" | "staff";
 }) => {
-  const pickupDay = await store.pickupDayOf({ code });
-  if (!pickupDay) return fail("NOT_FOUND");
+  const state = await store.reservationStateOf({ code });
+  if (!state) return fail("NOT_FOUND");
+  const { pickupDay, pickedUp } = state;
   const closedForCustomer =
     cancelledBy === "customer" && isReservationClosed({ now, pickupDay, cutoff });
   if (closedForCustomer) return fail("RESERVATIONS_CLOSED");
+  if (pickedUp) return fail("PICKED_UP");
 
   const cancelled = await store.cancel({ code });
   if (!cancelled) return fail("NOT_FOUND");

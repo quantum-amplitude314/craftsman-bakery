@@ -98,6 +98,7 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
           code: reservation.code,
           name: reservation.name,
           phone: reservation.phone,
+          pickedUpAt: reservation.pickedUpAt,
           productId: product.id,
           productName: product.name,
           quantity: reservationItem.quantity,
@@ -106,10 +107,21 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
         .innerJoin(reservationItem, eq(reservationItem.reservationCode, reservation.code))
         .innerJoin(product, eq(product.id, reservationItem.productId))
         .where(eq(reservation.pickupDay, pickupDay))
-        .orderBy(asc(reservation.name), asc(reservation.code), asc(product.name));
+        .orderBy(
+          sql`${reservation.pickedUpAt} is not null`,
+          asc(reservation.name),
+          asc(reservation.code),
+          asc(product.name),
+        );
       const byCode = new Map<string, PickupReservation>();
-      for (const { code, name, phone, productId, productName, quantity } of rows) {
-        const pickup = byCode.get(code) ?? { code, name, phone, items: [] };
+      for (const { code, name, phone, pickedUpAt, productId, productName, quantity } of rows) {
+        const pickup = byCode.get(code) ?? {
+          code,
+          name,
+          phone,
+          pickedUp: pickedUpAt !== null,
+          items: [],
+        };
         pickup.items.push({ productId, name: productName, quantity });
         byCode.set(code, pickup);
       }

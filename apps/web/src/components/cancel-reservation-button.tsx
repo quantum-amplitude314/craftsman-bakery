@@ -8,6 +8,7 @@ import type { StaffCancelOutcome } from "@/lib/staff-cancel";
 
 const FAILURE_MESSAGES: Partial<Record<StaffCancelOutcome["status"], string>> = {
   "not-found": "Already cancelled.",
+  "picked-up": "Picked up already.",
   failed: "Could not cancel. Try again.",
 };
 

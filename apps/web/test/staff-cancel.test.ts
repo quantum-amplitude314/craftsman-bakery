@@ -9,6 +9,9 @@ describe("staffCancelFailureOf", () => {
 
     expect(staffCancelFailureOf(notFound)).toEqual({ status: "not-found" });
     expect(staffCancelFailureOf(unauthorized)).toEqual({ status: "signed-out" });
+    expect(
+      staffCancelFailureOf(new ORPCError("PICKED_UP", { defined: true, status: 409 })),
+    ).toEqual({ status: "picked-up" });
   });
 
   test("reports anything else as a failure to retry", () => {

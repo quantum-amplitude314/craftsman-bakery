@@ -62,6 +62,7 @@ export const reservation = pgTable("reservation", {
   name: text().notNull(),
   phone: text().notNull(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  pickedUpAt: timestamp({ withTimezone: true }),
 });
 
 export const reservationItem = pgTable(

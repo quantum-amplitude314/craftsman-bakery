@@ -2,6 +2,7 @@
 
 import { capacityInputSchema, codeSchema, pickupDaySchema } from "@craftsman-bakery/contracts";
 import { refresh } from "next/cache";
+import { z } from "zod";
 import { apiClient } from "@/lib/api";
 import {
   type CapacityState,
@@ -11,6 +12,7 @@ import {
 import type { ClefAdviceState } from "@/lib/clef-advice";
 import { loadClefAdvice } from "@/lib/load-clef-advice";
 import { type StaffCancelOutcome, staffCancelFailureOf } from "@/lib/staff-cancel";
+import { type StaffPickupOutcome, staffPickupFailureOf } from "@/lib/staff-pickup";
 
 export const cancelReservation = async (code: string): Promise<StaffCancelOutcome> => {
   const parsed = codeSchema.safeParse(code);
@@ -78,4 +80,24 @@ export const askClef = async (pickupDay: unknown): Promise<ClefAdviceState> => {
   const advice = await loadClefAdvice(parsed.data);
 
   return advice;
+};
+
+const pickupInputSchema = z.object({ code: codeSchema, pickedUp: z.boolean() });
+
+/** At the counter: the customer took the order, or staff undo a mistaken mark. */
+export const markPickedUp = async (pickup: unknown): Promise<StaffPickupOutcome> => {
+  const parsed = pickupInputSchema.safeParse(pickup);
+  if (!parsed.success) return { status: "failed" };
+
+  try {
+    await apiClient.staff.pickup(parsed.data);
+  } catch (error) {
+    const failed = staffPickupFailureOf(error);
+
+    return failed;
+  }
+  refresh();
+  const marked: StaffPickupOutcome = { status: "marked" };
+
+  return marked;
 };

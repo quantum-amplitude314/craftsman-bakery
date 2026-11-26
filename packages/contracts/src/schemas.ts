@@ -69,6 +69,7 @@ export const pickupListSchema = z.object({
       code: codeSchema,
       name: z.string(),
       phone: z.string(),
+      pickedUp: z.boolean(),
       items: z.array(productQuantitySchema),
     }),
   ),

@@ -2,6 +2,7 @@ import { type Availability, contract, type ReservationInput } from "@craftsman-b
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { implement } from "@orpc/server";
 import { cancelReservation } from "../commands/cancel-reservation.ts";
+import { markPickup } from "../commands/mark-pickup.ts";
 import type { ReservationWriteStore } from "../commands/ports.ts";
 import { reserveItems } from "../commands/reserve-items.ts";
 import { setCapacity } from "../commands/set-capacity.ts";
@@ -35,6 +36,7 @@ const implementedContract = {
   },
   staff: {
     cancel: contract.staff.cancel,
+    pickup: contract.staff.pickup,
     capacity: contract.staff.capacity,
     capacityAdvice: contract.staff.capacityAdvice,
     pickupList: contract.staff.pickupList,
@@ -112,6 +114,7 @@ const router = api.router({
         case "NOT_FOUND":
           throw errors.NOT_FOUND();
         case "RESERVATIONS_CLOSED":
+        case "PICKED_UP":
           throw errors.RESERVATIONS_CLOSED();
         default:
           throw outcome satisfies never;
@@ -136,6 +139,30 @@ const router = api.router({
           throw errors.NOT_FOUND();
         case "RESERVATIONS_CLOSED":
           throw new Error("Staff cancel regardless of the cutoff");
+        case "PICKED_UP":
+          throw errors.PICKED_UP();
+        default:
+          throw outcome satisfies never;
+      }
+    }),
+    pickup: api.staff.pickup.handler(async ({ input, context, errors }) => {
+      const { code, pickedUp } = input;
+      const { writeStore, cutoff, now, isStaff } = context;
+      if (!(await isStaff())) throw errors.UNAUTHORIZED();
+
+      const outcome = await markPickup({
+        store: writeStore,
+        now: now(),
+        timeZone: cutoff.timeZone,
+        code,
+        pickedUp,
+      });
+      if (outcome.ok) return;
+      switch (outcome.failure) {
+        case "NOT_FOUND":
+          throw errors.NOT_FOUND();
+        case "NOT_PICKUP_DAY":
+          throw errors.NOT_PICKUP_DAY();
         default:
           throw outcome satisfies never;
       }

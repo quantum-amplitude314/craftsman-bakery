@@ -1,6 +1,6 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import { capacityBelowReserved, notFound, unauthorized } from "./errors.ts";
+import { capacityBelowReserved, notFound, notPickupDay, pickedUp, unauthorized } from "./errors.ts";
 import {
   capacityAdviceSchema,
   capacityInputSchema,
@@ -21,7 +21,16 @@ export const staffContract = {
       summary: "Cancel a reservation by its code, also after the cutoff",
     })
     .input(z.object({ code: codeSchema }))
-    .errors({ ...notFound, ...unauthorized }),
+    .errors({ ...notFound, ...pickedUp, ...unauthorized }),
+  pickup: oc
+    .route({
+      method: "PUT",
+      path: "/staff/reservations/{code}/pickup",
+      successStatus: 204,
+      summary: "Mark a reservation picked up at the counter, or undo it, on its pickup day",
+    })
+    .input(z.object({ code: codeSchema, pickedUp: z.boolean() }))
+    .errors({ ...notFound, ...notPickupDay, ...unauthorized }),
   setCapacity: oc
     .route({
       method: "PUT",

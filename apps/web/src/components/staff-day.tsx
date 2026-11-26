@@ -96,7 +96,7 @@ export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchP
             </SectionError>
           )}
         </div>
-        <PickupListCard reservations={pickupList.reservations} />
+        <PickupListCard reservations={pickupList.reservations} isToday={choice === "today"} />
       </div>
     </div>
   );

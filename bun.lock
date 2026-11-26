@@ -12,7 +12,7 @@
     },
     "apps/api": {
       "name": "@craftsman-bakery/api",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@craftsman-bakery/contracts": "workspace:*",
         "@orpc/openapi": "catalog:",
@@ -33,7 +33,7 @@
     },
     "apps/web": {
       "name": "@craftsman-bakery/web",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@base-ui/react": "^1.9.0",
         "@craftsman-bakery/contracts": "workspace:*",
@@ -67,7 +67,7 @@
     },
     "packages/contracts": {
       "name": "@craftsman-bakery/contracts",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@orpc/contract": "catalog:",
         "zod": "catalog:",
@@ -78,7 +78,7 @@
     },
     "packages/maintain": {
       "name": "@craftsman-bakery/maintain",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@craftsman-bakery/contracts": "workspace:*",
         "better-auth": "catalog:",

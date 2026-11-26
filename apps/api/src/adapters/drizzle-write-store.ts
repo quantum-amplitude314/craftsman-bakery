@@ -90,13 +90,26 @@ export const createDrizzleWriteStore = ({ db }: { db: Db }) => {
 
       return "RESERVED";
     },
-    pickupDayOf: async ({ code }) => {
+    reservationStateOf: async ({ code }) => {
       const [found] = await db
-        .select({ pickupDay: reservation.pickupDay })
+        .select({ pickupDay: reservation.pickupDay, pickedUpAt: reservation.pickedUpAt })
         .from(reservation)
         .where(eq(reservation.code, code));
+      if (!found) return null;
 
-      return found?.pickupDay ?? null;
+      const { pickupDay, pickedUpAt } = found;
+      const state = { pickupDay, pickedUp: pickedUpAt !== null };
+
+      return state;
+    },
+    setPickedUp: async ({ code, pickedUpAt }) => {
+      const updated = await db
+        .update(reservation)
+        .set({ pickedUpAt })
+        .where(eq(reservation.code, code))
+        .returning({ code: reservation.code });
+
+      return updated.length > 0;
     },
     cancel: ({ code }) =>
       db.transaction(async (tx) => {
