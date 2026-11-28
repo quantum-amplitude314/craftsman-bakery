@@ -82,6 +82,24 @@ export const reservationItem = pgTable(
   ],
 );
 
+/** Who visited the demo in a window, as the demo Worker counts it every hour; staff read the latest. */
+export const visitorCount = pgTable(
+  "visitor_count",
+  {
+    until: timestamp({ withTimezone: true }).primaryKey(),
+    since: timestamp({ withTimezone: true }).notNull(),
+    people: integer().notNull(),
+    agents: integer().notNull(),
+    bots: integer().notNull(),
+  },
+  (table) => [
+    check(
+      "visitor_count_non_negative",
+      sql`${table.people} >= 0 and ${table.agents} >= 0 and ${table.bots} >= 0`,
+    ),
+  ],
+);
+
 const timestamps = {
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),

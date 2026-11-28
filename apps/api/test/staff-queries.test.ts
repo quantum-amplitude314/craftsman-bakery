@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
 import { createDrizzleWriteStore } from "../src/adapters/drizzle-write-store.ts";
 import { reserveItems } from "../src/commands/reserve-items.ts";
+import { visitorCount } from "../src/db/schema.ts";
 import { createApiTestContext, sendApi } from "./api.ts";
 import {
   codesFrom,
@@ -156,7 +157,7 @@ describe("staff queries", () => {
     const visitor = createApiTestContext({ db });
 
     const statuses = await Promise.all(
-      ["pickup-list", "capacity"].map(async (path) => {
+      ["pickup-list", "capacity", "visitor-counts"].map(async (path) => {
         const { status } = await sendApi({
           method: "GET",
           path: `/staff/${path}?pickupDay=${pickupDay}`,
@@ -167,6 +168,51 @@ describe("staff queries", () => {
       }),
     );
 
-    expect(statuses).toEqual([401, 401]);
+    expect(statuses).toEqual([401, 401, 401]);
+  });
+
+  test("visitor counts are null until the first count", async () => {
+    const { status, body } = await sendApi({
+      method: "GET",
+      path: "/staff/visitor-counts",
+      context: staff,
+    });
+
+    expect(status).toBe(200);
+    expect(body).toBeNull();
+  });
+
+  test("visitor counts are the latest count", async () => {
+    await db.insert(visitorCount).values([
+      {
+        since: new Date("2026-11-27T09:00:00Z"),
+        until: new Date("2026-11-28T09:00:00Z"),
+        people: 1,
+        agents: 2,
+        bots: 30,
+      },
+      {
+        since: new Date("2026-11-27T10:00:00Z"),
+        until: new Date("2026-11-28T10:00:00Z"),
+        people: 2,
+        agents: 1,
+        bots: 31,
+      },
+    ]);
+
+    const { status, body } = await sendApi({
+      method: "GET",
+      path: "/staff/visitor-counts",
+      context: staff,
+    });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({
+      since: "2026-11-27T10:00:00.000Z",
+      until: "2026-11-28T10:00:00.000Z",
+      people: 2,
+      agents: 1,
+      bots: 31,
+    });
   });
 });

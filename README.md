@@ -53,8 +53,6 @@ apps/api             API Worker: contract handlers, commands, queries, Clef adap
 packages/contracts   oRPC contract, Zod schemas, calendar helpers
 ```
 
-Not included: the demo data, its seed and the nightly demo Worker (`packages/maintain`), and the
-project notes (`docs/`).
 
 ## Development
 

@@ -27,16 +27,13 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "lint:fix": "biome check --write . && biome check --write --vcs-use-ignore-file=false --no-errors-on-unmatched packages/maintain/demo packages/maintain/worker",
+    "lint:fix": "biome check --write .",
     "db:up": "podman compose up -d --wait",
     "db:down": "podman compose down",
     "db:generate": "bun run --cwd apps/api db:generate",
     "db:migrate": "bun run --cwd apps/api db:migrate",
     "db:migrate:preview": "bun run --cwd apps/api db:migrate:preview",
-    "db:migrate:production": "bun run --cwd apps/api db:migrate:production",
-    "demo:seed": "bun run --cwd packages/maintain demo:seed",
-    "demo:seed:preview": "bun run --cwd packages/maintain demo:seed:preview",
-    "demo:seed:production": "bun run --cwd packages/maintain demo:seed:production"
+    "db:migrate:production": "bun run --cwd apps/api db:migrate:production"
   },
   "devDependencies": {
     "@socketsecurity/bun-security-scanner": "^1.1.3",

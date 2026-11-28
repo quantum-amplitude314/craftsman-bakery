@@ -57,6 +57,13 @@
       "when": 1795674507226,
       "tag": "0007_tranquil_sue_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795859197746,
+      "tag": "0008_brave_meteorite",
+      "breakpoints": true
     }
   ]
 }

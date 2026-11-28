@@ -8,6 +8,7 @@ import {
   dayCapacitySchema,
   pickupDaySchema,
   pickupListSchema,
+  visitorCountsSchema,
 } from "./schemas.ts";
 
 const pickupDayInputSchema = z.object({ pickupDay: pickupDaySchema });
@@ -66,5 +67,13 @@ export const staffContract = {
     })
     .input(pickupDayInputSchema)
     .output(pickupListSchema)
+    .errors(unauthorized),
+  visitorCounts: oc
+    .route({
+      method: "GET",
+      path: "/staff/visitor-counts",
+      summary: "The latest count of the demo's visitors by kind; null before the first count",
+    })
+    .output(visitorCountsSchema.nullable())
     .errors(unauthorized),
 };

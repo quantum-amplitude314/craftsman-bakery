@@ -8,6 +8,7 @@ import {
   product,
   reservation,
   reservationItem,
+  visitorCount,
 } from "../db/schema.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
 
@@ -127,6 +128,24 @@ export const createDrizzleReadStore = ({ db }: { db: Db }) => {
       }
 
       return [...byCode.values()];
+    },
+    latestVisitorCounts: async () => {
+      const [latest] = await db
+        .select()
+        .from(visitorCount)
+        .orderBy(desc(visitorCount.until))
+        .limit(1);
+      if (!latest) return null;
+      const { since, until, people, agents, bots } = latest;
+      const counts = {
+        since: since.toISOString(),
+        until: until.toISOString(),
+        people,
+        agents,
+        bots,
+      };
+
+      return counts;
     },
   };
 

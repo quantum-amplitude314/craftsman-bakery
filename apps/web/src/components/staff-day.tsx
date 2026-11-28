@@ -13,6 +13,7 @@ import { SectionError } from "@/components/section-error";
 import { SessionExpired } from "@/components/session-expired";
 import { StaffCard } from "@/components/staff-card";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { VisitorCountsCard } from "@/components/visitor-counts-card";
 import { apiClient } from "@/lib/api";
 import { formatDay } from "@/lib/bakery-day";
 import { getEnv } from "@/lib/env";
@@ -85,8 +86,8 @@ export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchP
         <h2 className="font-heading font-semibold text-2xl">{formatDay(pickupDay)}</h2>
         <DaySwitch today={today} current={choice} />
       </div>
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-        <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-6 lg:self-start">
           <BakeCountCard {...dayCapacity} />
           {choice === "today" ? null : (
             <SectionError>
@@ -96,7 +97,13 @@ export async function StaffDay({ searchParams }: { searchParams: StaffDaySearchP
             </SectionError>
           )}
         </div>
-        <PickupListCard reservations={pickupList.reservations} isToday={choice === "today"} />
+        {/* From lg the left column sets the height; the pickup list fills what the visitors leave. */}
+        <div className="flex flex-col gap-6 lg:h-0 lg:min-h-full">
+          <PickupListCard reservations={pickupList.reservations} isToday={choice === "today"} />
+          <Suspense fallback={null}>
+            <VisitorCountsCard />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ export function SiteHeader({ children }: { children?: ReactNode }) {
         {/* biome-ignore lint/performance/noImgElement: a tiny SVG needs no optimisation */}
         <img src="/icon.svg" alt="" width={32} height={32} />
         <span className="font-heading font-semibold text-primary text-xl">Craftsman Bakery</span>
-        {children ? <nav className="ml-auto">{children}</nav> : null}
+        {children ? <nav className="ml-auto flex items-center gap-2">{children}</nav> : null}
       </div>
     </header>
   );

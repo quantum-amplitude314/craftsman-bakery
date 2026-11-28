@@ -12,6 +12,7 @@ import { getDayCapacity } from "../queries/day-capacity.ts";
 import type { DemandAdvisor } from "../queries/demand-advisor.ts";
 import { getPickupList } from "../queries/pickup-list.ts";
 import type { ReservationReadStore } from "../queries/ports.ts";
+import { getVisitorCounts } from "../queries/visitor-counts.ts";
 import { type CutoffConfig, nextOpenPickupDay } from "../rules/cutoff.ts";
 
 export type ApiContext = {
@@ -41,6 +42,7 @@ const implementedContract = {
     capacityAdvice: contract.staff.capacityAdvice,
     pickupList: contract.staff.pickupList,
     setCapacity: contract.staff.setCapacity,
+    visitorCounts: contract.staff.visitorCounts,
   },
 };
 
@@ -192,6 +194,12 @@ const router = api.router({
       if (!(await isStaff())) throw errors.UNAUTHORIZED();
 
       return getPickupList({ store: freshReadStore, pickupDay });
+    }),
+    visitorCounts: api.staff.visitorCounts.handler(async ({ context, errors }) => {
+      const { isStaff, freshReadStore } = context;
+      if (!(await isStaff())) throw errors.UNAUTHORIZED();
+
+      return getVisitorCounts({ store: freshReadStore });
     }),
     setCapacity: api.staff.setCapacity.handler(async ({ input, context, errors }) => {
       const { isStaff, writeStore } = context;

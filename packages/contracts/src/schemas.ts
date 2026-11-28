@@ -122,3 +122,13 @@ export const capacityAdviceSchema = z.object({
   ),
 });
 export type CapacityAdvice = z.infer<typeof capacityAdviceSchema>;
+
+/** Visitors of the demo in a window, by kind, as the demo Worker counted them. */
+export const visitorCountsSchema = z.object({
+  since: z.iso.datetime(),
+  until: z.iso.datetime(),
+  people: z.int().nonnegative(),
+  agents: z.int().nonnegative(),
+  bots: z.int().nonnegative(),
+});
+export type VisitorCounts = z.infer<typeof visitorCountsSchema>;

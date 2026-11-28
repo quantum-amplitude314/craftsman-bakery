@@ -82,6 +82,7 @@
       "dependencies": {
         "@craftsman-bakery/contracts": "workspace:*",
         "better-auth": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "^1.4.5",

@@ -70,7 +70,7 @@ export function PickupListCard({
   isToday: boolean;
 }) {
   return (
-    <StaffCard>
+    <StaffCard className="min-h-0 lg:flex-1">
       <CardHeader>
         <CardTitle className="text-lg">
           Pickup list
@@ -79,12 +79,13 @@ export function PickupListCard({
           ) : null}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex min-h-0 flex-1 flex-col">
         {reservations.length === 0 ? (
           <p className="text-muted-foreground">No reservations.</p>
         ) : (
-          // Scrolls inside the card, so a busy day does not stretch the page.
-          <ul className="-mr-4 max-h-[36rem] divide-y divide-border overflow-y-auto pr-4 [scrollbar-gutter:stable] [scrollbar-width:thin]">
+          // Scrolls inside the card, so a busy day does not stretch the page: up to a fixed height
+          // in one column, from lg within the height the left column sets.
+          <ul className="-mr-4 max-h-[36rem] min-h-0 flex-1 divide-y divide-border overflow-y-auto pr-4 [scrollbar-gutter:stable] [scrollbar-width:thin] lg:max-h-none">
             {reservations.map((reservation) => (
               <PickupEntry key={reservation.code} reservation={reservation} isToday={isToday} />
             ))}
